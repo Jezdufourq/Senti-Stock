@@ -1,18 +1,18 @@
 <template>
   <q-page class="flex flex-center row">
     <div>
-      <login-component />
+      <signup-component />
     </div>
   </q-page>
 </template>
 
 <script>
-import loginComponent from '../components/loginComponent'
+import signupComponent from '../components/signupComponent'
 
 export default {
   name: 'Index',
   components: {
-    loginComponent
+    signupComponent
   }
 }
 </script>

@@ -1,7 +1,7 @@
 const createError = require("http-errors");
 const path = require('path')
 const express = require('express')
-const port = 3000
+const port = process.env.PORT || 3000;
 
 require("dotenv").config();
 
@@ -18,6 +18,7 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const analysisRouter = require("./routes/analysis");
 const tweetsRouter = require("./routes/tweets");
 const tickerRouter = require("./routes/ticker");
+const usersRouter = require("./routes/users");
 
 //Init app
 const app = express();
@@ -60,6 +61,7 @@ logger.token("req", (req, res) => {
 app.use("/api", analysisRouter);
 app.use("/api", tweetsRouter)
 app.use("/api", tickerRouter);
+app.use("/api", usersRouter);
 app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Routes which arent associated to API will redirect to static assets for SPA

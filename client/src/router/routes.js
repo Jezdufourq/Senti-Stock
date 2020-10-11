@@ -5,6 +5,7 @@ import MainLayout from 'layouts/MainLayout'
 // pages
 import Index from 'pages/Index'
 import Analysis from 'pages/Analysis'
+import Register from 'pages/Register'
 
 const routes = [
   {
@@ -12,7 +13,8 @@ const routes = [
     component: MainLayout,
     children: [
       { path: '', component: Index },
-      { path: 'analysis', component: Analysis }
+      { path: 'analysis', component: Analysis },
+      { path: 'register', component: Register }
     ]
   },
 
