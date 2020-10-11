@@ -7,35 +7,39 @@
         </div>
       </q-card-section>
       <q-card-section>
-        <q-form
-          @submit="onSubmit"
-          class="q-gutter-md"
-        >
+        <q-form class="q-gutter-md" @submit="onSubmit">
           <q-input
-            filled
             v-model="signUp.name"
+            filled
             name="name"
             label="name"
+            hint="Please enter your name"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || 'Please type something']"
+            :rules="[val => (val && val.length > 0) || 'Please type something']"
           />
           <q-input
-            filled
             v-model="signUp.email"
+            filled
             name="email"
+            type="email"
             label="email"
+            hint="Please enter your email"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || 'Please type something']"
+            :rules="[val => (val && val.length > 0) || 'Please type something']"
           />
           <q-input
-            label="password"
             v-model="signUp.password"
+            label="password"
             filled
             :type="isPwd ? 'password' : 'text'"
             hint="Please enter a password"
-            :rules="[ val => val && val.length > 6 || 'Password must be longer than 6 characters']"
+            :rules="[
+              val =>
+                (val && val.length > 6) ||
+                'Password must be longer than 6 characters'
+            ]"
           >
-            <template v-slot:append>
+            <template #append>
               <q-icon
                 :name="isPwd ? 'visibility_off' : 'visibility'"
                 class="cursor-pointer"
@@ -44,14 +48,18 @@
             </template>
           </q-input>
           <q-input
-            label="re-enter password"
             v-model="signUp.password2"
+            label="re-enter password"
             filled
             :type="isPwd ? 'password' : 'text'"
             hint="Re-enter the same password"
-            :rules="[ val => val && val.length > 6 || 'Password must be longer than 6 characters']"
+            :rules="[
+              val =>
+                (val && val.length > 6) ||
+                'Password must be longer than 6 characters'
+            ]"
           >
-            <template v-slot:append>
+            <template #append>
               <q-icon
                 :name="isPwd ? 'visibility_off' : 'visibility'"
                 class="cursor-pointer"
@@ -60,18 +68,9 @@
             </template>
           </q-input>
           <div class="items-between">
-            <q-btn
-              label="Sign Up"
-              type="submit"
-              color="primary"
-            />
-            <q-btn
-              label="Go Back To Login"
-              color="primary"
-              to='/'
-            />
+            <q-btn label="Sign Up" type="submit" color="primary" />
+            <q-btn label="Go Back To Login" color="primary" to="/" />
           </div>
-
         </q-form>
       </q-card-section>
     </q-card>
@@ -80,7 +79,7 @@
 <script>
 import axios from 'axios'
 export default {
-  name: 'signupComponent',
+  name: 'SignupComponent',
   data () {
     return {
       signUp: {
@@ -94,13 +93,36 @@ export default {
   },
   methods: {
     onSubmit () {
-      axios.post('api/users/register', this.signUp)
-        .then((response) => {
-          console.log(response)
+      if (this.signUp.password !== this.signUp.password2) {
+        // validation for passwords
+        this.$q.notify({
+          color: 'negative',
+          message: 'Your passwords need to match'
         })
-        .catch((error) => {
-          console.log(error)
-        })
+      } else {
+        axios
+          .post('api/users/register', this.signUp)
+          .then(response => {
+            console.log(response)
+          })
+          .catch(error => {
+            console.log(error)
+          })
+          .finally(() => {
+            this.$q.notify({
+              color: 'positive',
+              textColor: 'white',
+              message:
+                'Your application has been submitted! Sign in with your email and password'
+            })
+            // resetting signUp obj
+            this.signUp.name = null
+            this.signUp.password = null
+            this.signUp.password2 = null
+            this.signUp.email = null
+            this.$router.push('/')
+          })
+      }
     }
   }
 }

@@ -4,7 +4,7 @@
  */
 // This grabs the production url and stores it in a variable to be loaded into the project
 
- module.exports = function ( ctx ) {
+module.exports = function (ctx) {
   return {
     // https://quasar.dev/quasar-cli/supporting-ts
     supportTS: false,
@@ -56,7 +56,7 @@
     devServer: {
       proxy: {
         '/api': {
-          target: 'http://localhost:3000',
+          target: 'http://localhost:3000'
         }
       }
     },
