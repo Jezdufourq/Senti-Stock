@@ -160,7 +160,7 @@ router.get('/tweets-detailed', asyncHandler(async function (req, res, next) {
   // ticker query sanitization
   // sanitize/lookup stock ticker
   var tradingViewResp = await tradingViewUtil.searchStockTickers(req.query.ticker).catch((error) => { console.log(error) })
-  if (tradingViewResp.length == 0) {
+  if (tradingViewResp.length === 0) {
     const err = new Error('You have entered an invalid stock ticker')
     err.status = 400
     next(err)
@@ -173,5 +173,37 @@ router.get('/tweets-detailed', asyncHandler(async function (req, res, next) {
   res.writeHead(200, { 'Content-Type': 'application/json' })
   res.end(JSON.stringify(twitterResp), 'utf-8')
 }))
+
+/**
+ * @swagger
+ * /api/tweets
+ *  post:
+ *   description: retrieves a tweet feed from the Twitter search API, and persists the tweets into the database
+ *   produces:
+ *    - application/json
+ *   parameters:
+      - in: body
+        name: tweetParams
+        description: The parameters required to create the tweets based on the stock ticker
+        schema:
+          type: object
+          required:
+            - ticker
+            - count
+            - type
+            - lang
+          properties:
+            ticker:
+              type: string
+            count:
+              type: integer
+            type:
+              type: string
+            lang:
+              type: string
+ */
+router.get('/tweets', (req, res) => {
+  const { ticker, count, type, lang } = req.body
+})
 
 module.exports = router

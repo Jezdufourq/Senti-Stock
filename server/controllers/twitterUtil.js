@@ -8,13 +8,14 @@ var client = new Twitter({
   bearer_token: process.env.TWITTER_BEARER_TOKEN
 })
 
-/* getTweetsText()
-Description - gets the text for each of the tweets. Returns a promise.
-*/
-module.exports = {
-  getTweetsText: async function getTweetsText (params) {
+const Tweet = {
+/**
+ * getTweetsText()
+ * Gets the text for each of the tweets. Returns a promise.
+ */
+  async getTweetsText (req, res) {
     var returnArr = []
-    return await client.get('search/tweets', params)
+    return await client.get('search/tweets', req.body)
       .then((response) => {
         response.statuses.forEach((status) => {
           returnArr.push(status.text)
@@ -27,16 +28,20 @@ module.exports = {
       })
   },
 
-  /* getAnalysis()
-    Description - gets the detailed information for each of the tweets. Returns a promise.
-    */
-  getTweetsDetailed: async function getTweetsDetailed (params) {
-    return await client.get('search/tweets', params)
-      .then((response) => {
-        return response.statuses
+  /**
+   * getTweetsDetailed()
+   * Gets the detailed information for each of the tweets. Returns a promise.
+   */
+  async getTweetsDetailed (req, res) {
+    return await client.get('search/tweets', req.body)
+      .then((res) => {
+        return res.statuses
       })
       .catch((error) => {
         console.log(error)
       })
   }
+}
+module.exports = {
+  Tweet
 }
