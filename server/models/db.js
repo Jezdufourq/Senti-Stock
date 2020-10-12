@@ -1,18 +1,24 @@
 const { pool } = require('../config/dbConfig')
+const dotenv = require('dotenv')
+
+dotenv.config()
+
+pool.on('connect', () => {
+  console.log('connected to the db')
+})
 
 /**
- * Create user table
+ * Create tweets table
  */
-const createUserTable = () => {
+const createTweetsTable = () => {
   const queryText =
-    `CREATE TABLE IF NOT EXISTS
-    users(id UUID PRIMARY KEY,
-        email VARCHAR(255) NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        created_date TIMESTAMP,
-        modified_date TIMESTAMP
-        )`
+  `CREATE TABLE IF NOT EXISTS
+  tweets(id UUID PRIMARY KEY,
+    created_date TIMESTAMP,
+    modified_date TIMESTAMP,
+    tweet VARCHAR(255),
+    ticker VARCHAR(63)
+    )`
   pool.query(queryText)
     .then((res) => {
       console.log(res)
@@ -23,11 +29,45 @@ const createUserTable = () => {
 }
 
 /**
- * Drop user table
+ * Drop tweets table
  */
+const dropTweetsTable = () => {
+  const queryText = 'DROP TABLE IF EXISTS tweets returning *'
+  pool.query(queryText)
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+}
 
-const dropUserTable = () => {
-  const queryText = 'DROP TABLE IF EXISTS users returning *'
+/**
+ * Create sentiment table
+ */
+const createSentimentTable = () => {
+  const queryText =
+  `CREATE TABLE IF NOT EXISTS
+  sentiment(id UUID PRIMARY KEY,
+    created_date TIMESTAMP,
+    modified_date TIMESTAMP,
+    analysis VARCHAR(63),
+    ticker VARCHAR(63)
+    )`
+  pool.query(queryText)
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+}
+
+/**
+ * Drop sentiment table
+ */
+const dropSentimentTable = () => {
+  const queryText = 'DROP TABLE IF EXISTS sentiment returning *'
   pool.query(queryText)
     .then((res) => {
       console.log(res)
@@ -41,19 +81,58 @@ const dropUserTable = () => {
  * Create all tables
  */
 const createAllTables = () => {
-  createUserTable()
+  createTweetsTable()
+  createSentimentTable()
 }
 
 /**
   * Drop all tables
   */
 const dropAllTables = () => {
-  dropUserTable()
+  dropTweetsTable()
+  dropSentimentTable()
 }
 
 module.exports = {
-  createUserTable,
-  dropUserTable,
   createAllTables,
   dropAllTables
 }
+
+require('make-runnable')
+
+/**
+ * Create user table
+ */
+// const createUserTable = () => {
+//   const queryText =
+//     `CREATE TABLE IF NOT EXISTS
+//     users(id UUID PRIMARY KEY,
+//         email VARCHAR(255) NOT NULL,
+//         name VARCHAR(255) NOT NULL,
+//         password VARCHAR(255) NOT NULL,
+//         created_date TIMESTAMP,
+//         modified_date TIMESTAMP
+//         )`
+//   pool.query(queryText)
+//     .then((res) => {
+//       console.log(res)
+//     })
+//     .catch((err) => {
+//       console.log(err)
+//     })
+// }
+
+/**
+ * Drop user table
+ */
+
+// const dropUserTable = () => {
+//   const queryText = 'DROP TABLE IF EXISTS users returning *'
+//   pool.query(queryText)
+//     .then((res) => {
+//       console.log(res)
+//     })
+//     .catch((err) => {
+//       console.log(err)
+//     })
+// }

@@ -1,5 +1,5 @@
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 /**
  * Helper class with helper functions
@@ -34,4 +34,8 @@ const Helper = {
     return token
   }
 
+}
+
+module.exports = {
+  Helper
 }
