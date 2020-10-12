@@ -1,7 +1,7 @@
 var express = require('express')
-const asyncHandler = require('express-async-handler')
 var router = express.Router()
-const { pool } = require('../dbConfig')
+const asyncHandler = require('express-async-handler')
+const { pool } = require('../config/dbConfig')
 const bcrypt = require('bcrypt')
 
 router.get('/users/register', (req, res) => {
