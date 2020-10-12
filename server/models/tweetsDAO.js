@@ -1,85 +1,81 @@
-const Helper = require('../util/helper')
 const moment = require('moment')
 const uuidv4 = require('uuid/v4')
 const { pool } = require('../config/dbConfig')
 
-const User = {
+const Tweet = {
   /**
-     * Create a user
+     * Create a tweet entry
      */
-  async create (req, res) {
-    if (!req.body.email || !req.body.password) {
-      return res.status(400).send({ message: 'You are missing an email or a password. Please enter these values' })
-    }
-
-    const hashPassword = Helper.hashPassword(req.body.password)
-
+  async createTweet (req, res) {
     const createQuery = `INSERT INTO
-    users(id, username, password, created_date, modified_date)
+    tweets(id, created_date, modified_date, tweet, ticker)
     VALUES($1, $2, $3, $4, $5)
     returning *`
     const insertedValues = [
       uuidv4(),
-      req.body.email,
-      hashPassword,
       moment(new Date()),
-      moment(new Date())
+      moment(new Date()),
+      req.body.tweet,
+      req.body.ticker
     ]
 
     try {
       const { rows } = await pool.query(createQuery, insertedValues)
-      // sending jwt token back to client
-      const token = Helper.generateToken(rows[0].id)
-      return res.status(201).send({ token })
+      return res.status(201).send({ rows })
     } catch (error) {
-      if (error.routine === '_bt_check_unique') {
-        return res.status(400).send({ message: `User with that email ${req.body.email} already exist` })
-      }
       return res.status(400).send(error)
     }
   },
 
   /**
-   * Login with a user
+   * Retrieve a tweet entry based on stock ticker
    */
-  async login (req, res) {
-    if (!req.body.email || !req.body.password) {
-      return res.status(400).send({ message: 'You are missing an email or a password. Please enter these values' })
-    }
-
-    const queryText = 'sELECT * FROM users WHERE email = $1'
+  async getTweet (req, res) {
+    const queryText = 'SELECT * FROM tweets WHERE ticker = $1'
     try {
-      const { rows } = await pool.query(queryText, [req.body.email])
+      const { rows } = await pool.query(queryText, [req.body.ticker])
       if (!rows[0]) {
-        return res.status(400).send({ message: 'You have provided the wrong email and password' })
-      }
-      if (!Helper.comparePassword(rows[0].password, req.body.password)) {
-        return res.status(400).send({ message: 'You have provided the wrong email and password' })
+        return res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.body.ticker}` })
       }
       // creating jwt token
-      const token = Helper.generateToken(rows[0].id)
-      return res.status(200).send({ token })
+      return res.status(200).send({ rows })
     } catch (error) {
       return res.status(400).send(error)
     }
   },
 
   /**
-   * Delete a user
+   * Retrieve a selection of tweet entries between a start and end date
    */
-  async delete (req, res) {
-    const deleteQuery = 'DELETE FROM users WHERE id=$1 returning *'
+  async getTweetsBetweenDates (req, res) {
+    const queryText = 'SELECT * FROM tweets WHERE created_date IS BETWEEN $1 AND $2'
     try {
-      const { rows } = await pool.query(deleteQuery, [req.user.id])
+      const { rows } = await pool.query(queryText, [req.body.start_date, req.body.end_date])
       if (!rows[0]) {
-        return res.status(404).send({ message: 'user not found' })
+        return res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.body.ticker}` })
       }
-      return res.status(204).send({ message: 'deleted' })
+      return res.status(200).send({ rows })
     } catch (error) {
       return res.status(400).send(error)
     }
   }
+
+  /**
+   * Delete a select of tweets based on a ticker
+   */
+//   async delete (req, res) {
+//     const deleteQuery = 'DELETE FROM users WHERE id=$1 returning *'
+//     try {
+//       const { rows } = await pool.query(deleteQuery, [req.user.id])
+//       if (!rows[0]) {
+//         return res.status(404).send({ message: 'user not found' })
+//       }
+//       return res.status(204).send({ message: 'deleted' })
+//     } catch (error) {
+//       return res.status(400).send(error)
+//     }
+//   }
 }
 module.exports = {
-  User
+  Tweet
 }

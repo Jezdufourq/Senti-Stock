@@ -47,7 +47,7 @@ const User = {
       return res.status(400).send({ message: 'You are missing an email or a password. Please enter these values' })
     }
 
-    const queryText = 'sELECT * FROM users WHERE email = $1'
+    const queryText = 'SELECT * FROM users WHERE email = $1'
     try {
       const { rows } = await pool.query(queryText, [req.body.email])
       if (!rows[0]) {
