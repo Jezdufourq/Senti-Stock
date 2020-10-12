@@ -1,11 +1,4 @@
 const { pool } = require('../config/dbConfig')
-const dotenv = require('dotenv')
-
-dotenv.config()
-
-pool.on('connect', () => {
-  console.log('connected to the db')
-})
 
 /**
  * Create tweets table
@@ -13,12 +6,13 @@ pool.on('connect', () => {
 const createTweetsTable = () => {
   const queryText =
   `CREATE TABLE IF NOT EXISTS
-  tweets(id UUID PRIMARY KEY,
+    tweets(tweet_id BIGTINT PRIMARY KEY,
     created_date TIMESTAMP,
     modified_date TIMESTAMP,
     tweet VARCHAR(255),
-    ticker VARCHAR(63)
-    )`
+    ticker VARCHAR(63),
+    tweet_date TIMESTAMP
+    );`
   pool.query(queryText)
     .then((res) => {
       console.log(res)
@@ -32,7 +26,7 @@ const createTweetsTable = () => {
  * Drop tweets table
  */
 const dropTweetsTable = () => {
-  const queryText = 'DROP TABLE IF EXISTS tweets returning *'
+  const queryText = 'DROP TABLE IF EXISTS tweets returning *;'
   pool.query(queryText)
     .then((res) => {
       console.log(res)
@@ -53,7 +47,7 @@ const createSentimentTable = () => {
     modified_date TIMESTAMP,
     analysis VARCHAR(63),
     ticker VARCHAR(63)
-    )`
+    );`
   pool.query(queryText)
     .then((res) => {
       console.log(res)
@@ -67,7 +61,7 @@ const createSentimentTable = () => {
  * Drop sentiment table
  */
 const dropSentimentTable = () => {
-  const queryText = 'DROP TABLE IF EXISTS sentiment returning *'
+  const queryText = 'DROP TABLE IF EXISTS sentiment returning *;'
   pool.query(queryText)
     .then((res) => {
       console.log(res)

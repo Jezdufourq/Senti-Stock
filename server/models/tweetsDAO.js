@@ -2,29 +2,31 @@ const moment = require('moment')
 const uuidv4 = require('uuid/v4')
 const { pool } = require('../config/dbConfig')
 
-const Tweet = {
+const TweetDAO = {
   /**
      * Create a tweet entry
      */
   async createTweet (req, res) {
     const createQuery = `INSERT INTO
-    tweets(id, created_date, modified_date, tweet, ticker)
-    VALUES($1, $2, $3, $4, $5)
+    tweets(tweet_id, created_date, modified_date, tweet, ticker, tweet_date)
+    VALUES($1, $2, $3, $4, $5, $6)
     returning *`
-    const insertedValues = [
-      uuidv4(),
-      moment(new Date()),
-      moment(new Date()),
-      req.body.tweet,
-      req.body.ticker
-    ]
 
-    try {
-      const { rows } = await pool.query(createQuery, insertedValues)
-      return res.status(201).send({ rows })
-    } catch (error) {
-      return res.status(400).send(error)
-    }
+    const insertedValues = [
+      req.tweet_id,
+      moment(new Date()),
+      moment(new Date()),
+      req.tweet,
+      req.ticker,
+      req.tweet_date
+    ]
+    console.log(createQuery)
+    console.log(insertedValues)
+
+    const { rows } = await pool.query(createQuery, insertedValues).catch((error) => {
+      console.log(error)
+    })
+    console.log('rows' + JSON.stringify(rows))
   },
 
   /**
@@ -48,9 +50,9 @@ const Tweet = {
    * Retrieve a selection of tweet entries between a start and end date
    */
   async getTweetsBetweenDates (req, res) {
-    const queryText = 'SELECT * FROM tweets WHERE created_date IS BETWEEN $1 AND $2'
+    const queryText = 'SELECT * FROM tweets WHERE created_date IS BETWEEN $1 AND $2 AND ticker=$3'
     try {
-      const { rows } = await pool.query(queryText, [req.body.start_date, req.body.end_date])
+      const { rows } = await pool.query(queryText, [req.start_date, req.end_date, req.ticker])
       if (!rows[0]) {
         return res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.body.ticker}` })
       }
@@ -77,5 +79,5 @@ const Tweet = {
 //   }
 }
 module.exports = {
-  Tweet
+  TweetDAO
 }

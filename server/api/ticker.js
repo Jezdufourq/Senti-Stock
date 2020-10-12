@@ -4,7 +4,7 @@ const asyncHandler = require('express-async-handler')
 var router = express.Router()
 
 // util import
-var tradingViewUtil = require('../util/tradingviewUtil')
+var tradingViewUtil = require('../controllers/tradingviewUtil')
 
 /**
  *

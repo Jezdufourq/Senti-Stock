@@ -1,5 +1,6 @@
 // import middleware
 var Twitter = require('twitter')
+const { TweetDAO } = require('../models/tweetsDAO')
 
 // defining twitter middleware params
 var client = new Twitter({
@@ -40,6 +41,37 @@ const Tweet = {
       .catch((error) => {
         console.log(error)
       })
+  },
+
+  /**
+   * Create tweet data
+   */
+  async createTweets (req, res) {
+    const twitterSearchResults = await client.get('search/tweets', req)
+      .then((response) => {
+        // console.log(response)
+        return response
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+    const tweets = twitterSearchResults.statuses
+    for (const tweet of tweets) {
+      // persist the tweets into the SQL database first
+      const resp = await TweetDAO.createTweet({ tweet_id: tweet.id, tweet_date: tweet.created_at, tweet: tweet.text, ticker: req.q }).catch((err) => { console.log(err) })
+      // if the tweets are already in the SQL database, then retrieve them from the cache
+    }
+    return { tweets: tweets, ticker: req.q }
+  },
+
+  /**
+   * Get tweet data
+   * This should accept a date range
+   */
+  async getTweets (req, res) {
+    const { start_date, end_date, stock_ticker } = req
+
+    // if the tweets are in the database, store in the redis cache
   }
 }
 module.exports = {

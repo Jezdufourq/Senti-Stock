@@ -4,9 +4,9 @@ const asyncHandler = require('express-async-handler')
 var router = express.Router()
 
 // util import
-var parallelDotsUtil = require('../util/parallelDotsUtil')
-var twitterUtil = require('../util/twitterUtil')
-var tradingViewUtil = require('../util/tradingviewUtil')
+var parallelDotsUtil = require('../controllers/parallelDotsUtil')
+var twitterUtil = require('../controllers/twitterUtil')
+var tradingViewUtil = require('../controllers/tradingviewUtil')
 
 // default query params
 var params = {
