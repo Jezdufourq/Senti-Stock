@@ -8,8 +8,8 @@ const TweetDAO = {
      */
   async createTweet (req, res) {
     const createQuery = `INSERT INTO
-    tweets(tweet_id, created_date, modified_date, tweet, ticker, tweet_date)
-    VALUES($1, $2, $3, $4, $5, $6)
+    tweets(tweet_id, created_date, modified_date, tweet, ticker, tweet_date, sentiment)
+    VALUES($1, $2, $3, $4, $5, $6, $7)
     returning *`
 
     const insertedValues = [
@@ -18,7 +18,8 @@ const TweetDAO = {
       moment(new Date()),
       req.tweet,
       req.ticker,
-      req.tweet_date
+      req.tweet_date,
+      req.sentiment
     ]
     console.log(createQuery)
     console.log(insertedValues)
@@ -27,7 +28,26 @@ const TweetDAO = {
       console.log(error)
     })
     console.log('rows' + JSON.stringify(rows))
+    return rows
   },
+
+  /**
+   * retrieve an entry in the tweets table based on id
+   */
+  async getTweetOnId(req, res) {
+    const queryText = 'SELECT * FROM tweets WHERE tweet_id = $1'
+    try {
+      const {rows} = await pool.query(queryText, [req.tweet_id])
+      if (!rows[0]) {
+        res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.tweet_id}` })
+      }
+      return rows
+    }catch(error) {
+      res.status(500).send('Error')
+    }
+  }
+
+
 
   /**
    * Retrieve all tweets based on stock ticker
@@ -37,7 +57,7 @@ const TweetDAO = {
     try {
       const { rows } = await pool.query(queryText, [req.ticker])
       if (!rows[0]) {
-        res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.body.ticker}` })
+        res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.ticker}` })
       }
       return rows
     } catch (error) {

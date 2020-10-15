@@ -4,7 +4,8 @@ const asyncHandler = require('express-async-handler')
 var router = express.Router()
 
 // util import
-const { Tweet } = require('../controllers/twitterUtil')
+const { Tweet } = require('../controllers/tweetsUtil')
+const { Cache } = require('../controllers/cache')
 const tradingViewUtil = require('../controllers/tradingviewUtil')
 
 var params = {
@@ -13,6 +14,9 @@ var params = {
   result_type: 'recent',
   count: 10
 }
+
+// router.post('tweet/:ticker', Cache.getTweetCache())
+// router.get('tweet/:ticker', Tweet.getTweets())
 
 router.get('/tweet-stream/:ticker', asyncHandler(async function (req, res, next) {
   const { ticker } = req.params
@@ -179,38 +183,13 @@ router.get('/tweets-detailed', asyncHandler(async function (req, res, next) {
   res.end(JSON.stringify(twitterResp), 'utf-8')
 }))
 
-/**
- * @swagger
- * /api/tweets
- *  post:
- *   description: retrieves a tweet feed from the Twitter search API, and persists the tweets into the database
- *   produces:
- *    - application/json
- *   parameters:
-      - in: body
-        name: tweetParams
-        description: The parameters required to create the tweets based on the stock ticker
-        schema:
-          type: object
-          required:
-            - ticker
-            - count
-            - type
-            - lang
-          properties:
-            ticker:
-              type: string
-            count:
-              type: integer
-            type:
-              type: string
-            lang:
-              type: string
- */
 router.post('/tweets', asyncHandler(async function (req, res, next) {
   const { tickers, settings } = req.body
+  console.log(tickers[0])
+  const result = await Tweet.createTweet({ q: tickers[0], lang: settings.lang, count: settings.count, resultType: settings.result_type })
   console.log(tickers)
   console.log(settings)
+  console.log(result)
   res.writeHead(200, { 'Content-Type': 'application/json' })
 }))
 

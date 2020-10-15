@@ -11,7 +11,8 @@ const createTweetsTable = () => {
     modified_date TIMESTAMP,
     tweet VARCHAR(255),
     ticker VARCHAR(63),
-    tweet_date TIMESTAMP
+    tweet_date TIMESTAMP,
+    sentiment BIGTINT
     );`
   pool.query(queryText)
     .then((res) => {

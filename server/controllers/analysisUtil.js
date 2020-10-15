@@ -1,18 +1,12 @@
-const Sentiment = require('sentiment')
-const sentiment = new Sentiment()
-
+var natural = require('natural')
+var Analyzer = natural.SentimentAnalyzer
+var stemmer = natural.PorterStemmer
+var analyzer = new Analyzer('English', stemmer, 'afinn')
 const Analysis = {
-  /**
-   * get sentiment on a certain stock ticker based on available data
-   */
-  getTickerSentiment (req, res) {
-    const { ticker } = req.ticker
-    const { data } = req.data
-    const sentimentResult = sentiment.analyze(data)
-    console.log(sentimentResult)
-    res.send({ ticker: ticker, result: sentimentResult })
+  getSentiment (req, res) {
+    console.log(analyzer.getSentiment(req.text))
+    return analyzer.getSentiment(req.text)
   }
-
 }
 
 module.exports = {

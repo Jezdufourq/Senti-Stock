@@ -18,24 +18,24 @@ const Cache = {
       console.log(error)
       res.status(500)
     }
-  },
+  }
 
   /**
    * Method to handle getting the cached tweets
    */
-  getTweetCache (req, res, next) {
-    const { tweetId } = req.params
+  // getTweetCache (req, res, next) {
+  //   const { ticker } = req.params
 
-    client.get(tweetId, (error, data) => {
-      if (error) throw error
+  //   client.get(ticker, (error, data) => {
+  //     if (error) throw error
 
-      if (data != null) {
-        return data
-      } else {
-        next()
-      }
-    })
-  }
+  //     if (data != null) {
+  //       return data
+  //     } else {
+  //       next()
+  //     }
+  //   })
+  // }
 }
 
 module.exports = {

@@ -5,7 +5,7 @@ var router = express.Router()
 
 // util import
 var tradingViewUtil = require('../controllers/tradingviewUtil')
-const { Tweet } = require('../controllers/twitterUtil')
+const { Tweet } = require('../controllers/tweetsUtil')
 const { Analysis } = require('../controllers/analysisUtil')
 
 /**
