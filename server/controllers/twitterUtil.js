@@ -1,46 +1,29 @@
 // import middleware
-var Twitter = require('twitter')
+var Twit = require('twit')
 const { TweetDAO } = require('../models/tweetsDAO')
 
 // defining twitter middleware params
-var client = new Twitter({
+var client = new Twit({
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
   consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  bearer_token: process.env.TWITTER_BEARER_TOKEN
+  access_token: process.env.TWITTER_ACCESS_TOKEN,
+  access_token_secret: process.env.TWITTER_ACCESS_SECRET
 })
 
 const Tweet = {
-/**
- * getTweetsText()
- * Gets the text for each of the tweets. Returns a promise.
- */
-  async getTweetsText (req, res) {
-    var returnArr = []
-    return await client.get('search/tweets', req.body)
-      .then((response) => {
-        response.statuses.forEach((status) => {
-          returnArr.push(status.text)
-        })
-        returnArr.join(' ')
-        return returnArr
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  },
-
   /**
-   * getTweetsDetailed()
-   * Gets the detailed information for each of the tweets. Returns a promise.
+   * Stream tweet data
    */
-  async getTweetsDetailed (req, res) {
-    return await client.get('search/tweets', req.body)
-      .then((res) => {
-        return res.statuses
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+  streamTweets (req, res) {
+    var stream = client.stream('statuses/filter', { track: req.ticker, lang: 'en' })
+
+    stream.on('tweet', function (tweet) {
+      console.log(tweet)
+      res.write(tweet)
+    })
+    stream.on('error', function (error) {
+      console.log(error)
+    })
   },
 
   /**
@@ -64,14 +47,32 @@ const Tweet = {
     return { tweets: tweets, ticker: req.q }
   },
 
+  async getTweets (req, res) {
+    return await TweetDAO.getTweets({ ticker: req.ticker }).catch((error) => {
+      console.log(error)
+    })
+  },
+
   /**
    * Get tweet data
    * This should accept a date range
    */
-  async getTweets (req, res) {
-    const { start_date, end_date, stock_ticker } = req
-
+  async getTweetsBetweenDates (req, res) {
+    return await TweetDAO.getTweetsBetweenDates({ end_date: req.start_date, start_date: req.end_date, ticker: req.ticker }).catch((error) => {
+      console.log(error)
+    })
     // if the tweets are in the database, store in the redis cache
+  },
+
+  /**
+   * clean tweet data
+   */
+  cleanTweetData (req, res) {
+    const tweetArr = []
+    req.data.forEach((element) => {
+      tweetArr.push(element.tweet)
+    })
+    return tweetArr
   }
 }
 module.exports = {

@@ -10,7 +10,6 @@ const helmet = require('helmet')
 const cors = require('cors')
 const logger = require('morgan')
 const session = require('express-session')
-const flash = require('express-flash')
 
 // Enable Swagger Docs
 const swaggerUI = require('swagger-ui-express')
@@ -20,7 +19,6 @@ const swaggerJsDoc = require('swagger-jsdoc')
 const analysisRouter = require('./api/analysis')
 const tweetsRouter = require('./api/tweets')
 const tickerRouter = require('./api/ticker')
-const usersRouter = require('./api/users')
 
 // Init app
 const app = express()
@@ -69,7 +67,6 @@ logger.token('res', (req, res) => {
 app.use('/api', analysisRouter)
 app.use('/api', tweetsRouter)
 app.use('/api', tickerRouter)
-app.use('/api', usersRouter)
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
 // Routes which arent associated to API will redirect to static assets for SPA

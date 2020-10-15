@@ -30,19 +30,18 @@ const TweetDAO = {
   },
 
   /**
-   * Retrieve a tweet entry based on stock ticker
+   * Retrieve all tweets based on stock ticker
    */
-  async getTweet (req, res) {
+  async getTweets (req, res) {
     const queryText = 'SELECT * FROM tweets WHERE ticker = $1'
     try {
-      const { rows } = await pool.query(queryText, [req.body.ticker])
+      const { rows } = await pool.query(queryText, [req.ticker])
       if (!rows[0]) {
-        return res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.body.ticker}` })
+        res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.body.ticker}` })
       }
-      // creating jwt token
-      return res.status(200).send({ rows })
+      return rows
     } catch (error) {
-      return res.status(400).send(error)
+      res.status(500).send('Error')
     }
   },
 
@@ -50,16 +49,16 @@ const TweetDAO = {
    * Retrieve a selection of tweet entries between a start and end date
    */
   async getTweetsBetweenDates (req, res) {
-    const queryText = 'SELECT * FROM tweets WHERE created_date IS BETWEEN $1 AND $2 AND ticker=$3'
-    try {
-      const { rows } = await pool.query(queryText, [req.start_date, req.end_date, req.ticker])
-      if (!rows[0]) {
-        return res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.body.ticker}` })
-      }
-      return res.status(200).send({ rows })
-    } catch (error) {
-      return res.status(400).send(error)
+    const queryText = 'SELECT * FROM tweets WHERE tweet_date BETWEEN $1 AND $2 AND ticker=$3'
+    const insertedValues = [req.start_date, req.end_date, req.ticker]
+    const { rows } = await pool.query(queryText, insertedValues).catch((error) => {
+      console.log(error)
+    })
+    if (rows.length === 0) {
+      return new Error({ status: 400, message: `There are no entries in the database with ticker ${req.ticker}` })
+    //   return res.status(400)
     }
+    return rows
   }
 
   /**

@@ -14,6 +14,12 @@ var params = {
   count: 10
 }
 
+router.get('/tweet-stream/:ticker', asyncHandler(async function (req, res, next) {
+  const { ticker } = req.params
+  const results = Tweet.streamTweets({ ticker: ticker })
+  res.write(results)
+}))
+
 /**
  *
  * @swagger
@@ -48,28 +54,33 @@ var params = {
  *     description: 'A successful response.'
  *
 */
-router.get('/tweets', asyncHandler(async function (req, res, next) {
-  // query sanitization
-  if (!req.query) {
-    const err = new Error('Required query params missing. You must enter a stock ticker.')
+router.get('/tweets/:ticker', asyncHandler(async function (req, res, next) {
+  const { ticker } = req.params
+  // ticker query sanitization
+  // sanitize/lookup stock ticker
+  var tradingViewResp = await tradingViewUtil.searchStockTickers(ticker).catch((error) => { console.log(error) })
+  if (tradingViewResp.length === 0) {
+    const err = new Error('You have entered an invalid stock ticker.')
     err.status = 400
     next(err)
   }
+
+  const results = await Tweet.getTweets({ ticker: ticker }).catch((error) => { console.log(error) })
+
+  // sending response back
+  res.writeHead(200, { 'Content-Type': 'application/json' })
+  res.end(JSON.stringify(results), 'utf-8')
+}))
+
+router.get('/tweets/between-dates', asyncHandler(async function (req, res, next) {
+  // start_date
+  // end_date
+  // ticker
   if (!req.query.ticker) {
     const err = new Error('Required query params missing. You must enter a stock ticker.')
     err.status = 400
     next(err)
   }
-  if (!req.query.count) {
-    params.count = 10 // setting default to 10
-  }
-  if (!req.query.type) {
-    params.result_type = 'recent' // setting default to 10
-  }
-  if (!req.query.lang) {
-    params.lang = 'en' // setting default to 10
-  }
-
   // ticker query sanitization
   // sanitize/lookup stock ticker
   var tradingViewResp = await tradingViewUtil.searchStockTickers(req.query.ticker).catch((error) => { console.log(error) })
@@ -79,18 +90,12 @@ router.get('/tweets', asyncHandler(async function (req, res, next) {
     next(err)
   }
 
-  // settings params
-  params.q = req.query.ticker
-  params.count = req.query.count
-  params.result_type = req.query.type
-  params.lang = 'en'
-
-  // send the data to the twitter API
-  var twitterResp = await Tweet.getTweetsText(params).catch((error) => { console.log(error) })
-
-  // sending response back
+  const tweetsBetweenDates = await Tweet.getTweetsBetweenDates({ end_date: req.query.end_date, start_date: req.query.start_date, ticker: req.query.ticker }).catch((error) => {
+    console.log(error)
+    next(error)
+  })
   res.writeHead(200, { 'Content-Type': 'application/json' })
-  res.end(JSON.stringify(twitterResp), 'utf-8')
+  res.end(JSON.stringify(tweetsBetweenDates), 'utf-8')
 }))
 
 /**
@@ -202,18 +207,11 @@ router.get('/tweets-detailed', asyncHandler(async function (req, res, next) {
             lang:
               type: string
  */
-router.post('/tweets', asyncHandler(async function (req, res) {
-  const { ticker, count, type, lang } = req.body
-  params.q = ticker
-  params.count = count
-  params.result_type = type
-  params.lang = lang
-
-  console.log(params)
-  console.log(req.body)
-  const twitterResp = await Tweet.createTweets(params).catch((error) => { console.log(error) })
+router.post('/tweets', asyncHandler(async function (req, res, next) {
+  const { tickers, settings } = req.body
+  console.log(tickers)
+  console.log(settings)
   res.writeHead(200, { 'Content-Type': 'application/json' })
-  res.end(JSON.stringify(twitterResp), 'utf-8')
 }))
 
 module.exports = router

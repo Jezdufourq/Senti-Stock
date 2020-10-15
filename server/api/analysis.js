@@ -4,24 +4,16 @@ const asyncHandler = require('express-async-handler')
 var router = express.Router()
 
 // util import
-var parallelDotsUtil = require('../controllers/parallelDotsUtil')
-var twitterUtil = require('../controllers/twitterUtil')
 var tradingViewUtil = require('../controllers/tradingviewUtil')
-
-// default query params
-var params = {
-  q: null,
-  lang: 'en',
-  result_type: 'recent',
-  count: 10
-}
+const { Tweet } = require('../controllers/twitterUtil')
+const { Analysis } = require('../controllers/analysisUtil')
 
 /**
  *
  * @swagger
  * /api/analysis:
  *  get:
- *   description: Retrieves the analysis using tweets which are fed into the ParallelDots sentiment API.
+ *   description: Retrieves the analysis based on a certain stock ticker
  *   produces:
  *    - application/json
  *   parameters:
@@ -53,66 +45,28 @@ var params = {
  *
  */
 router.get(
-  '/analysis',
+  '/analysis/:ticker',
   asyncHandler(async function (req, res, next) {
-    // query sanitization
-    if (!req.query) {
-      const err = new Error(
-        'Required query params missing. You must enter a stock ticker.'
-      )
-      err.status = 400
-      next(err)
-    }
-    if (!req.query.ticker) {
-      const err = new Error(
-        'Required query params missing. You must enter a stock ticker.'
-      )
-      err.status = 400
-      next(err)
-    }
-    if (!req.query.count) {
-      params.count = 10 // setting default to 10
-    }
-    if (!req.query.type) {
-      params.result_type = 'recent' // setting default to 10
-    }
-    if (!req.query.lang) {
-      params.lang = 'en' // setting default to 10
-    }
-
-    // settings params
-    params.q = req.query.ticker
-    params.count = req.query.count
-    params.result_type = req.query.type
-    params.lang = req.query.lang
-
+    const { ticker } = req.params
     // sanitize/lookup stock ticker
     var tradingViewResp = await tradingViewUtil
-      .searchStockTickers(req.query.ticker)
+      .searchStockTickers(ticker)
       .catch((error) => {
         console.log(error)
       })
-    if (tradingViewResp.length == 0) {
+    if (tradingViewResp.length === 0) {
       const err = new Error('You have entered an invalid stock ticker.')
       err.status = 400
       next(err)
     }
-
-    // send the data to the twitter API
-    var twitterResp = await twitterUtil.getTweetsText(params).catch((error) => {
-      console.log(error)
-    })
-    var sentimentResp = await parallelDotsUtil
-      .getParallelDotsSentiment(twitterResp)
-      .catch((error) => {
-        console.log(error)
-      })
-
-    // sending response back
+    const tweetResponse = await Tweet.getTweets({ ticker: ticker }).catch((error) => { console.log(error) })
+    const data = Tweet.cleanTweetData({ data: tweetResponse })
+    const analysis = Analysis.getTickerSentiment({ ticker: ticker, data: data }).catch((error) => { console.log(error) })
+    console.log(analysis)
     res.writeHead(200, {
       'Content-Type': 'application/json'
     })
-    res.end(sentimentResp, 'utf-8')
+    res.end(JSON.stringify(analysis), 'utf-8')
   })
 )
 
