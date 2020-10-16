@@ -1,33 +1,61 @@
 <template>
-  <div>
-    <div class="text-h3 q-pa-md text-left text-bold">Chart</div>
-    <div>
-      <VueTradingView
-        class="q-pa-md"
-        :options="{
-            symbol: exchangeSymbol + ':' + stockSymbol,
-            width: '100%',
-        }"
-      />
+<q-card class="q-pa-md">
+  <q-card-section>
+    <div class="text-h4 text-bold">
+      Test Chart
     </div>
+  </q-card-section>
+  <q-card-section>
+  <div class="small">
+    <line-chart :chart-data="datacollection"></line-chart>
+    <button @click="fillData()">Randomize</button>
   </div>
+  </q-card-section>
+</q-card>
 </template>
 
 <script>
-import VueTradingView from 'vue-trading-view'
+import LineChart from './LineChart.js'
 
 export default {
-  name: 'chartComponent',
   components: {
-    VueTradingView
+    LineChart
   },
-  computed: {
-    stockSymbol () {
-      return this.$store.state.stockTicker
+  data () {
+    return {
+      datacollection: null
+    }
+  },
+  mounted () {
+    this.fillData()
+  },
+  methods: {
+    fillData () {
+      this.datacollection = {
+        labels: [this.getRandomInt(), this.getRandomInt()],
+        datasets: [
+          {
+            label: 'Data One',
+            backgroundColor: '#f87979',
+            data: [this.getRandomInt(), this.getRandomInt()]
+          }, {
+            label: 'Data One',
+            backgroundColor: '#f87979',
+            data: [this.getRandomInt(), this.getRandomInt()]
+          }
+        ]
+      }
     },
-    exchangeSymbol () {
-      return this.$store.state.exchangeSymbol
+    getRandomInt () {
+      return Math.floor(Math.random() * (50 - 5 + 1)) + 5
     }
   }
 }
 </script>
+
+<style>
+  .small {
+    max-width: 600px;
+    margin:  150px auto;
+  }
+</style>

@@ -1,5 +1,6 @@
 <template>
   <div style="max-height: 300px;width:500px">
+    <q-card class="full-height">
     <div class="row items-center">
       <div class="text-h5 q-pa-md text-left text-bold">Your previous searches</div>
       <div class="col-auto">
@@ -30,6 +31,7 @@
         </q-item>
       </q-list>
     </div>
+    </q-card>
   </div>
 </template>
 

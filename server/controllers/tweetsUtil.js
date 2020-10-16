@@ -50,7 +50,7 @@ const Tweet = {
       // TODO: Regis store
       // if tweet is is currently in database
       // store it in the redis store
-      // return from regis store
+      // return from regis store`
       // if tweet is in database and regis store
       // get from regis store
 

@@ -1,18 +1,23 @@
 <template>
-  <q-page class="flex flex-center row">
-    <div>
-      <login-component />
+  <q-page class="row">
+    <div class="col-auto q-pa-md">
+      <history-component />
+    </div>
+    <div class="col-auto q-pa-md">
+      <chart-component />
     </div>
   </q-page>
 </template>
 
 <script>
-import loginComponent from '../components/loginComponent'
+import chartComponent from '../components/chartComponent'
+import historyComponent from '../components/historyComponent'
 
 export default {
   name: 'Index',
   components: {
-    loginComponent
+    chartComponent,
+    historyComponent
   }
 }
 </script>
