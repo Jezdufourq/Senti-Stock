@@ -1,118 +1,139 @@
 <template>
   <div style="max-height: 300px;width:500px">
     <q-card class="full-height">
-    <div class="row items-center">
-      <div class="text-h5 q-pa-md text-left text-bold">Your previous searches</div>
-      <div class="col-auto">
-        <q-btn color="primary" text-color="white" label="Reset" @click="resetTickers"/>
+      <div class="row items-center">
+        <div class="text-h3 q-pa-md text-left text-bold">Your Tickers</div>
+        <div class="col-auto">
+          <q-btn
+            color="primary"
+            text-color="white"
+            label="Add Ticker"
+            @click="dialog = true"
+          />
+          <q-dialog v-model="dialog">
+            <q-card>
+              <div class="q-pa-md row items-center">
+                <div
+                  v-if="loadingState"
+                  class="col"
+                  style="width:500px; height:300px"
+                >
+                  <loading />
+                </div>
+                <div class="col" style="width:500px" v-if="!loadingState">
+                  <div class="text-h5 text-bold">
+                    Click on a ticker
+                  </div>
+                  <div class="q-py-md">
+                    <q-table
+                      color="primary"
+                      style="height:300px"
+                      :data="stockTickerSearch"
+                      :columns="stockTickerColumns"
+                      row-key
+                      virtual-scroll
+                      :virtual-scroll-item-size="48"
+                      @request="searchTickerQuery"
+                      @row-click="rowClick"
+                    />
+                  </div>
+                </div>
+              </div>
+            </q-card>
+          </q-dialog>
+        </div>
       </div>
-    </div>
-    <div v-if="items.length == 0" class="q-pa-md" style="height:200px">
-      You need to search some items.
-    </div>
-    <div class="list scroll q-pa-md" style="height:200px">
+      <div v-if="items.length == 0" class="q-pa-md" style="height:200px">
+        You need to search some tickers. Click Add Ticker.
+      </div>
+      <div class="list scroll q-pa-md" style="height:200px"></div>
       <q-list>
-        <q-item
-          v-for="item in items"
-          :key="item"
-          clickable
-        >
-          <q-item-section class="text-body text-bold">
-            {{ item }}
-          </q-item-section>
-          <q-item-section side>
-            <q-icon
-              name="search"
-              color="primary"
-              @click="searchTicker(item)"
-              class="cursor-pointer"
-            />
-          </q-item-section>
-        </q-item>
       </q-list>
-    </div>
     </q-card>
   </div>
 </template>
 
 <script>
+import loading from './loading'
 import axios from 'axios'
 export default {
-  name: 'tweetsComponent',
+  name: 'historyComponent',
+  components: {
+    loading
+  },
   data () {
     return {
-      loadingState: false
-    }
-  },
-  computed: {
-    items: {
-      get () {
-        return this.$store.state.searchHistory
-      },
-      set (payload) {
-        this.$store.commit('updateSearchHistory', payload)
-      }
-    },
-    stockTicker: {
-      get () {
-        return this.$store.state.stockTicker
-      },
-      set (payload) {
-        this.$store.commit('updateStockTicker', payload)
-      }
-    },
-    analysisResult: {
-      get () {
-        return this.$store.state.analysisResult
-      },
-      set (payload) {
-        this.$store.commit('updateAnalysisResult', payload)
-      }
-    },
-    tweets: {
-      get () {
-        return this.$store.state.tweets
-      },
-      set (payload) {
-        this.$store.commit('updateTweets', payload)
-      }
+      items: [],
+      dialog: false,
+      tickers: [],
+      loadingState: false,
+      stockTickerSearch: [],
+      stockTickerColumns: [
+        {
+          name: 'symbol',
+          required: true,
+          label: 'Ticker',
+          field: row => row.symbol,
+          align: 'left',
+          sortable: false
+        },
+        {
+          name: 'description',
+          required: true,
+          label: 'Description',
+          field: row => row.description,
+          align: 'left',
+          sortable: false
+        },
+        {
+          name: 'exchange',
+          required: true,
+          label: 'Exchange',
+          field: row => row.exchange,
+          align: 'left',
+          sortable: false
+        }
+      ]
     }
   },
   methods: {
-    resetTickers () {
-      this.$store.commit('resetSearchHistory')
+    addTickers () {
+      // make an axios call, update the chart data
     },
-    searchTicker (ticker) {
-      this.stockTicker = ticker
-      var promiseArr = []
-      // updating loading state
-      this.loadingState = true
-
-      // 1st api call - analysis GET /api/analysis
-      promiseArr.push(axios.get('api/analysis?ticker=' + this.stockTicker.toUpperCase()))
-      // 2nd api call - tweets GET /api/tweets
-      promiseArr.push(axios.get('api/tweets-detailed?ticker=' + this.stockTicker.toUpperCase()))
-
-      Promise.all(promiseArr)
-        .then((response) => {
-          var analysisObj = {}
-          // dealing with the first response
-          analysisObj.negative = Math.round(response[0].data.sentiment.negative * 100)
-          analysisObj.positive = Math.round(response[0].data.sentiment.positive * 100)
-          analysisObj.neutral = Math.round(response[0].data.sentiment.neutral * 100)
-          this.analysisResult = analysisObj
-
-          // dealing with the second response
-          this.tweets = response[1].data
+    updateTicker (ticker, exchange) {
+      this.tickers.push({ ticker: ticker, exchange: exchange })
+      console.log(this.tickers)
+    },
+    searchTickerQuery (ticker) {
+      axios
+        .get('api/ticker/search-ticker?ticker=' + ticker)
+        .then(response => {
+          this.stockTickerSearch = response.data
         })
-        .catch((error) => {
-          this.notifyError(error)
+        .catch(error => {
+          console.log(error)
         })
-        .finally(() => {
-          this.loadingState = false
-          this.$router.push('/analysis')
-        })
+    },
+    rowClick (evt, row) {
+      this.tickers.push({ ticker: row.symbol, exchange: row.exchange })
+      console.log(this.tickers)
+      this.dialog = false
     }
+  },
+  mounted () {
+    // on mounted, it needs to go out and fetch the current tickers from the database
+    this.loadingState = true
+    axios
+      .get('api/ticker/search-top-tickers')
+      .then(response => {
+        this.stockTickerSearch = response.data
+      })
+      .catch(error => {
+        console.log(error)
+      })
+      .finally(() => {
+        this.loadingState = false
+      })
   }
 }
 </script>

@@ -45,6 +45,7 @@ export default {
   },
   mounted () {
     this.fillData()
+    // when chart is mounted, it should pull the data from the server
   },
   methods: {
     fillData () {
@@ -52,11 +53,13 @@ export default {
         datasets: [
           {
             label: 'Data One',
-            backgroundColor: '#00A2BF',
+            borderColor: '#00A2BF',
+            fill: false,
             data: [{ t: new Date(2020, 10, 10, 10, 10, 10, 10), y: this.getRandomInt() }, { t: new Date(2020, 10, 11, 10, 10, 10, 10), y: this.getRandomInt() }]
           }, {
             label: 'Data One',
-            backgroundColor: '#f87979',
+            borderColor: '#f87979',
+            fill: false,
             data: [{ t: new Date(2020, 10, 10, 10, 10, 10, 10), y: this.getRandomInt() }, { t: new Date(2020, 10, 11, 10, 10, 10, 10), y: this.getRandomInt() }]
           }
         ]
