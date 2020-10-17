@@ -7,7 +7,7 @@
   </q-card-section>
   <q-card-section>
   <div class="small">
-    <line-chart :chart-data="datacollection"></line-chart>
+    <line-chart :chart-data="datacollection" :options="options"></line-chart>
     <button @click="fillData()">Randomize</button>
   </div>
   </q-card-section>
@@ -23,7 +23,24 @@ export default {
   },
   data () {
     return {
-      datacollection: null
+      datacollection: null,
+      options: {
+        gridLines: {
+          display: true
+        },
+        scales: {
+          xAxes: [{
+            type: 'time',
+            distribution: 'series',
+            time: {
+              unit: 'day',
+              displayFormats: {
+                quarter: 'hA D MMM YYYY'
+              }
+            }
+          }]
+        }
+      }
     }
   },
   mounted () {
@@ -32,16 +49,15 @@ export default {
   methods: {
     fillData () {
       this.datacollection = {
-        labels: [this.getRandomInt(), this.getRandomInt()],
         datasets: [
           {
             label: 'Data One',
-            backgroundColor: '#f87979',
-            data: [this.getRandomInt(), this.getRandomInt()]
+            backgroundColor: '#00A2BF',
+            data: [{ t: new Date(2020, 10, 10, 10, 10, 10, 10), y: this.getRandomInt() }, { t: new Date(2020, 10, 11, 10, 10, 10, 10), y: this.getRandomInt() }]
           }, {
             label: 'Data One',
             backgroundColor: '#f87979',
-            data: [this.getRandomInt(), this.getRandomInt()]
+            data: [{ t: new Date(2020, 10, 10, 10, 10, 10, 10), y: this.getRandomInt() }, { t: new Date(2020, 10, 11, 10, 10, 10, 10), y: this.getRandomInt() }]
           }
         ]
       }
@@ -52,10 +68,3 @@ export default {
   }
 }
 </script>
-
-<style>
-  .small {
-    max-width: 600px;
-    margin:  150px auto;
-  }
-</style>
