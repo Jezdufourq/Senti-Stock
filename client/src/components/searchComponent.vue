@@ -72,7 +72,7 @@ export default {
   methods: {
     searchTickerQuery (ticker) {
       axios
-        .get('api/ticker/search-ticker?ticker=' + ticker)
+        .get('api/tradingview/search-ticker?ticker=' + ticker)
         .then(response => {
           this.stockTickerSearch = response.data
         })
@@ -85,13 +85,12 @@ export default {
       this.exchangeSymbol = row.exchange
       console.log(this.stockTicker)
       console.log(this.exchangeSymbol)
-      this.$emit('updateTicker')
     }
   },
   mounted () {
     this.loadingState = true
     axios
-      .get('api/ticker/search-top-tickers')
+      .get('api/tradingview/search-top-tickers')
       .then(response => {
         this.stockTickerSearch = response.data
       })

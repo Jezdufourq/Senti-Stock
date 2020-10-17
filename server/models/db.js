@@ -38,6 +38,40 @@ const dropTweetsTable = () => {
 }
 
 /**
+ * Create tweets table
+ */
+const createTickersTable = () => {
+  const queryText =
+  `CREATE TABLE IF NOT EXISTS
+    tickers(ticker_id BIGTINT PRIMARY KEY,
+    created_date TIMESTAMP,
+    modified_date TIMESTAMP,
+    ticker VARCHAR(63),
+    );`
+  pool.query(queryText)
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+}
+
+/**
+ * Drop tweets table
+ */
+const dropTickersTable = () => {
+  const queryText = 'DROP TABLE IF EXISTS tweets returning *;'
+  pool.query(queryText)
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+}
+
+/**
  * Create sentiment table
  */
 const createSentimentTable = () => {
@@ -78,6 +112,7 @@ const dropSentimentTable = () => {
 const createAllTables = () => {
   createTweetsTable()
   createSentimentTable()
+  createTickersTable()
 }
 
 /**
@@ -86,6 +121,7 @@ const createAllTables = () => {
 const dropAllTables = () => {
   dropTweetsTable()
   dropSentimentTable()
+  dropTickersTable()
 }
 
 module.exports = {
@@ -94,40 +130,3 @@ module.exports = {
 }
 
 require('make-runnable')
-
-/**
- * Create user table
- */
-// const createUserTable = () => {
-//   const queryText =
-//     `CREATE TABLE IF NOT EXISTS
-//     users(id UUID PRIMARY KEY,
-//         email VARCHAR(255) NOT NULL,
-//         name VARCHAR(255) NOT NULL,
-//         password VARCHAR(255) NOT NULL,
-//         created_date TIMESTAMP,
-//         modified_date TIMESTAMP
-//         )`
-//   pool.query(queryText)
-//     .then((res) => {
-//       console.log(res)
-//     })
-//     .catch((err) => {
-//       console.log(err)
-//     })
-// }
-
-/**
- * Drop user table
- */
-
-// const dropUserTable = () => {
-//   const queryText = 'DROP TABLE IF EXISTS users returning *'
-//   pool.query(queryText)
-//     .then((res) => {
-//       console.log(res)
-//     })
-//     .catch((err) => {
-//       console.log(err)
-//     })
-// }

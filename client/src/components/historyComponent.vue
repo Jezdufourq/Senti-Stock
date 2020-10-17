@@ -43,12 +43,29 @@
           </q-dialog>
         </div>
       </div>
-      <div v-if="items.length == 0" class="q-pa-md" style="height:200px">
+      <div v-if="tickers.length == 0" class="q-pa-md" style="height:200px">
         You need to search some tickers. Click Add Ticker.
       </div>
-      <div class="list scroll q-pa-md" style="height:200px"></div>
+      <div class="list scroll q-pa-md" style="height:200px">
       <q-list>
+        <q-item
+          v-for="ticker in tickers"
+          :key="ticker.ticker"
+          clickable
+        >
+          <q-item-section class="text-body text-bold">
+            {{ ticker.ticker }}
+          </q-item-section>
+          <q-item-section side>
+            <q-icon
+              name="edit"
+              color="primary"
+              class="cursor-pointer"
+            />
+          </q-item-section>
+        </q-item>
       </q-list>
+      </div>
     </q-card>
   </div>
 </template>
