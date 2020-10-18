@@ -123,7 +123,7 @@ export default {
     },
     searchTickerQuery (ticker) {
       axios
-        .get('api/ticker/search-ticker?ticker=' + ticker)
+        .get('api/tradingview/search-ticker?ticker=' + ticker)
         .then(response => {
           this.stockTickerSearch = response.data
         })
@@ -134,14 +134,23 @@ export default {
     rowClick (evt, row) {
       this.tickers.push({ ticker: row.symbol, exchange: row.exchange })
       console.log(this.tickers)
-      this.dialog = false
+      axios.post('api/ticker/current-ticker', {
+        ticker: row.symbol,
+        exchange: row.exchange
+      }).then(response => {
+        console.log(response)
+      }).catch(error => {
+        console.log(error)
+      }).finally(() => {
+        this.dialog = false
+      })
     }
   },
   mounted () {
     // on mounted, it needs to go out and fetch the current tickers from the database
     this.loadingState = true
     axios
-      .get('api/ticker/search-top-tickers')
+      .get('api/tradingview/search-top-tickers')
       .then(response => {
         this.stockTickerSearch = response.data
       })

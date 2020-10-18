@@ -34,20 +34,18 @@ const TweetDAO = {
   /**
    * retrieve an entry in the tweets table based on id
    */
-  async getTweetOnId(req, res) {
+  async getTweetOnId (req, res) {
     const queryText = 'SELECT * FROM tweets WHERE tweet_id = $1'
     try {
-      const {rows} = await pool.query(queryText, [req.tweet_id])
+      const { rows } = await pool.query(queryText, [req.tweet_id])
       if (!rows[0]) {
         res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.tweet_id}` })
       }
       return rows
-    }catch(error) {
+    } catch (error) {
       res.status(500).send('Error')
     }
-  }
-
-
+  },
 
   /**
    * Retrieve all tweets based on stock ticker

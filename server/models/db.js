@@ -43,10 +43,11 @@ const dropTweetsTable = () => {
 const createTickersTable = () => {
   const queryText =
   `CREATE TABLE IF NOT EXISTS
-    tickers(ticker_id BIGTINT PRIMARY KEY,
+    tickers(ticker_id UUID PRIMARY KEY,
     created_date TIMESTAMP,
     modified_date TIMESTAMP,
     ticker VARCHAR(63),
+    exchange VARCHAR(63)
     );`
   pool.query(queryText)
     .then((res) => {
@@ -81,7 +82,8 @@ const createSentimentTable = () => {
     created_date TIMESTAMP,
     modified_date TIMESTAMP,
     analysis VARCHAR(63),
-    ticker VARCHAR(63)
+    ticker VARCHAR(63),
+    exchange VARCHAR(63)
     );`
   pool.query(queryText)
     .then((res) => {

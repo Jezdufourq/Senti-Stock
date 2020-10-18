@@ -12,7 +12,6 @@
     </div>
     <div class="row flex flex-center">
       <div class="col-4 q-px-md">
-        <analysis-component />
         <tweets-component />
       </div>
       <div class="col-6 q-px-md">
@@ -23,14 +22,12 @@
 </template>
 
 <script>
-import analysisComponent from '../components/analysisComponent'
 import tweetsComponent from '../components/tweetsComponent'
 import chartComponent from '../components/chartComponent'
 
 export default {
   name: 'Analysis',
   components: {
-    analysisComponent,
     tweetsComponent,
     chartComponent
   }
