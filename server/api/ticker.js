@@ -2,26 +2,46 @@ var express = require('express')
 const asyncHandler = require('express-async-handler')
 var router = express.Router()
 const { tickersDAO } = require('../models/tickersDAO')
-const { Cache } = require('../controllers/cache')
+const Cache = require('../controllers/cache')
+const redis = require('redis')
+const client = redis.createClient()
 
 /**
  * Get current stored tickers for tweets
  */
+
+router.get('/current-tickers', asyncHandler(async function (req, res, next) {
+  // check in the cache
+  // if not there, check in the database
+  const tickerKey = 'current-tickers'
+  return client.get(tickerKey, async function (error, result) {
+    if (error) {
+      console.log(error)
+      return error
+    }
+    if (result) {
+      console.log('cache')
+      const resultJSON = JSON.parse(result)
+      return res.status(200).json(resultJSON)
+    } else {
+      console.log('db')
+      const currentTickers = await tickersDAO.getTickers()
+      res.status(200).send(currentTickers)
+    }
+  })
+}))
 
 /**
   * Store the current tickers for tweets
   */
 router.post('/current-ticker', asyncHandler(async function (req, res, next) {
   const { ticker, exchange } = req.body
-  console.log(ticker)
-  console.log(exchange)
   // persist into the database
   await tickersDAO.createTicker({ ticker: ticker, exchange: exchange })
   const currentTickers = await tickersDAO.getTickers()
-  console.log(currentTickers)
   // store the database entries into the cache
-  Cache.createTickerCache({ data: currentTickers })
-  res.sendStatus(200)
+  Cache.createCurrentTickers({ data: currentTickers })
+  res.status(200).send(currentTickers)
 }))
 
 module.exports = router

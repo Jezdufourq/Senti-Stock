@@ -43,18 +43,21 @@
           </q-dialog>
         </div>
       </div>
-      <div v-if="tickers.length == 0" class="q-pa-md" style="height:200px">
+      <div v-if="currentStockTickers.length === 0" class="q-pa-md" style="height:200px">
         You need to search some tickers. Click Add Ticker.
       </div>
       <div class="list scroll q-pa-md" style="height:200px">
       <q-list>
         <q-item
-          v-for="ticker in tickers"
-          :key="ticker.ticker"
+          v-for="ticker in currentStockTickers"
+          :key="ticker.ticker_id"
           clickable
         >
           <q-item-section class="text-body text-bold">
             {{ ticker.ticker }}
+          </q-item-section>
+          <q-item-section class="text-body text-bold">
+            {{ ticker.exchange }}
           </q-item-section>
           <q-item-section side>
             <q-icon
@@ -82,9 +85,10 @@ export default {
     return {
       items: [],
       dialog: false,
-      tickers: [],
       loadingState: false,
+      currentStockTickers: null,
       stockTickerSearch: [],
+      tickers: [],
       stockTickerColumns: [
         {
           name: 'symbol',
@@ -138,6 +142,7 @@ export default {
         ticker: row.symbol,
         exchange: row.exchange
       }).then(response => {
+        this.currentStockTickers = response.data
         console.log(response)
       }).catch(error => {
         console.log(error)
@@ -149,6 +154,16 @@ export default {
   mounted () {
     // on mounted, it needs to go out and fetch the current tickers from the database
     this.loadingState = true
+    axios.get('api/ticker/current-tickers')
+      .then((response) => {
+        this.currentStockTickers = response.data.data
+        console.log(this.currentStockTickers)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+      .finally(() => {
+      })
     axios
       .get('api/tradingview/search-top-tickers')
       .then(response => {

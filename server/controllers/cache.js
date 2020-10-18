@@ -4,43 +4,46 @@ const client = redis.createClient()
 // client.on('error', (err) => {
 //   console.log('Error ' + err)
 // })
-/**
- * Caching class using redis
- */
-const Cache = {
-  /**
-     * Method to handle caching the tweets
-     */
-  createTweetCache (req, res, next) {
-    try {
-      const { tweetId } = req.params
-      const { tweetData } = req.params
-      client.setex(tweetId, 3600, tweetData)
-    } catch (error) {
-      console.log(error)
-      res.status(500)
-    }
-  },
 
+module.exports = {
   /**
    * Method to create the cache for the current tickers
    */
-  createTickerCache (req, res, next) {
-    try {
-      const tickerKey = 'current-tickers'
-      const data = req.data
-      console.log(req.data)
-      client.setex(tickerKey, 3600, JSON.stringify({
-        source: 'S3 Cache',
-        data
-      }))
-    } catch (error) {
-      console.log(error)
-      res.sendStatus(500)
-    }
+  createCurrentTickers: function (req, res) {
+    const tickerKey = 'current-tickers'
+    const data = req.data
+    return client.setex(tickerKey, 3600, JSON.stringify({
+      source: 'Postgres Current Tickers Cache',
+      data
+    }), function (error, result) {
+      if (error) {
+        console.log(error)
+        return result
+      }
+      return result
+    })
+  },
+  getCurrentTickers: function (req, res) {
+    const tickerKey = 'current-tickers'
+    client.get(tickerKey, function (error, result) {
+      if (error) {
+        console.log(error)
+        return error
+      }
+      console.log(JSON.stringify(result))
+      const resultJSON = JSON.parse(result)
+      return res.status(200).json(resultJSON)
+    })
+  },
+  createTweetCache: function (req) {
+    const { tweetId } = req.params
+    const { tweetData } = req.params
+    client.setex(tweetId, 3600, tweetData, function (error, result) {
+      if (error) {
+        console.log(error)
+      }
+      return result
+    })
   }
-}
 
-module.exports = {
-  Cache
 }
