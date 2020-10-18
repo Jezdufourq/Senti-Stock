@@ -156,8 +156,11 @@ export default {
     this.loadingState = true
     axios.get('api/ticker/current-tickers')
       .then((response) => {
-        this.currentStockTickers = response.data.data
-        console.log(this.currentStockTickers)
+        if (response.data.length === 0) {
+          this.currentStockTickers = []
+        } else {
+          this.currentStockTickers = response.data.tickers
+        }
       })
       .catch((error) => {
         console.log(error)

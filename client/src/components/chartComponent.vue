@@ -16,7 +16,7 @@
 
 <script>
 import LineChart from './LineChart.js'
-
+import axios from 'axios'
 export default {
   components: {
     LineChart
@@ -24,6 +24,8 @@ export default {
   data () {
     return {
       datacollection: null,
+      currentTickers: [],
+      chartData: [],
       options: {
         gridLines: {
           display: true
@@ -44,8 +46,34 @@ export default {
     }
   },
   mounted () {
+    const promiseArr = []
     this.fillData()
     // when chart is mounted, it should pull the data from the server
+    axios.get('api/ticker/current-tickers')
+      .then((response) => {
+        if (response.data.length === 0) {
+          this.currentStockTickers = []
+        } else {
+          response.data.tickers.forEach((element) => {
+            this.currentTickers.push(element.ticker)
+          })
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+
+    this.currentTickers.forEach((ticker) => {
+      promiseArr.push(axios.get('api/tweets/analysis' + ticker))
+    })
+
+    Promise.all(promiseArr)
+      .then((response) => {
+        console.log(response)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   },
   methods: {
     fillData () {

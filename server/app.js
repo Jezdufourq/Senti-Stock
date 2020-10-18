@@ -16,11 +16,10 @@ const swaggerUI = require('swagger-ui-express')
 const swaggerJsDoc = require('swagger-jsdoc')
 
 // Routes
-// const analysisRouter = require('./api/analysis')
-// const tweetsRouter = require('./api/tweets')
+const tweetsRouter = require('./api/tweets')
 const tradingviewRouter = require('./api/tradingview')
 const tickerRouter = require('./api/ticker')
-// const testRouter = require('./api/test')
+const adminRouter = require('./api/admin')
 
 // Init app
 const app = express()
@@ -67,9 +66,10 @@ logger.token('res', (req, res) => {
 
 // API routes
 // app.use('/api', analysisRouter)
-// app.use('/api', tweetsRouter)
 app.use('/api/tradingview', tradingviewRouter)
 app.use('/api/ticker', tickerRouter)
+app.use('/api/tweets', tweetsRouter)
+app.use('/api/admin', adminRouter)
 // app.use('/api', testRouter)
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 

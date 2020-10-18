@@ -11,10 +11,10 @@ module.exports = {
    */
   createCurrentTickers: function (req, res) {
     const tickerKey = 'current-tickers'
-    const data = req.data
+    const tickers = req.data
     return client.setex(tickerKey, 3600, JSON.stringify({
       source: 'Postgres Current Tickers Cache',
-      data
+      tickers
     }), function (error, result) {
       if (error) {
         console.log(error)
@@ -35,15 +35,31 @@ module.exports = {
       return res.status(200).json(resultJSON)
     })
   },
-  createTweetCache: function (req) {
-    const { tweetId } = req.params
-    const { tweetData } = req.params
-    client.setex(tweetId, 3600, tweetData, function (error, result) {
+  createTweets: function (req) {
+    const ticker = req.ticker
+    const tweets = req.data
+    client.setex(ticker, 3600, JSON.stringify({
+      source: 'Postgres Current Tweet Cache',
+      query: ticker,
+      tweets
+    }), function (error, result) {
       if (error) {
         console.log(error)
       }
       return result
     })
-  }
+  },
 
+  updateCacheWithDatabase: function (req, res) {
+  },
+
+  deleteCache: function (req, res) {
+    client.flushdb(function (err, succeeded) {
+      if (err) {
+        console.log(err)
+        return res.status(500).send('The cache failed to flush')
+      }
+      console.log(succeeded)
+    })
+  }
 }

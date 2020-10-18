@@ -1,5 +1,4 @@
 const moment = require('moment')
-const uuidv4 = require('uuid/v4')
 const { pool } = require('../config/dbConfig')
 
 const TweetDAO = {
@@ -21,13 +20,10 @@ const TweetDAO = {
       req.tweet_date,
       req.sentiment
     ]
-    console.log(createQuery)
-    console.log(insertedValues)
 
     const { rows } = await pool.query(createQuery, insertedValues).catch((error) => {
       console.log(error)
     })
-    console.log('rows' + JSON.stringify(rows))
     return rows
   },
 
@@ -39,11 +35,11 @@ const TweetDAO = {
     try {
       const { rows } = await pool.query(queryText, [req.tweet_id])
       if (!rows[0]) {
-        res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.tweet_id}` })
+        return res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.tweet_id}` })
       }
       return rows
     } catch (error) {
-      res.status(500).send('Error')
+      return res.status(500).send('Error')
     }
   },
 
@@ -55,11 +51,11 @@ const TweetDAO = {
     try {
       const { rows } = await pool.query(queryText, [req.ticker])
       if (!rows[0]) {
-        res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.ticker}` })
+        return res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.ticker}` })
       }
       return rows
     } catch (error) {
-      res.status(500).send('Error')
+      return res.status(500).send('Error')
     }
   },
 

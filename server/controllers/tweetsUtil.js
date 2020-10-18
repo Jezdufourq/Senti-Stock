@@ -13,9 +13,9 @@ var client = new Twit({
 
 module.exports = {
   /**
-   * Fetch tweet function
+   * Fetches the tweets for a given ticker, gets the sentiment, and then persists into the database
    */
-  fetchTweets: async function (req, res) {
+  createTweetsAnalysis: async function (req, res) {
     const { q, lang, result_type, count } = req
     const returnArr = []
     const twitParams = {
@@ -24,6 +24,7 @@ module.exports = {
       result_type: result_type,
       count: count
     }
+    // search for the tweets
     const twitterSearchResults = await client.get('search/tweets', twitParams)
       .then((response) => {
         return response
@@ -33,57 +34,26 @@ module.exports = {
       })
 
     for (const tweet of twitterSearchResults.data.statuses) {
-      // const tokenResult = Parser.tokenTweets({ text: tweet.text })
-      // console.log(tokenResult)
+      // token and stem the tweets
       const tokenAndStemResult = Parser.tokenAndStemTweets({ text: tweet.text })
-      // console.log(tokenAndStemResult)
+      // perform some sentiment analysis
       const sentimentResult = Analysis.getSentiment({ text: tokenAndStemResult })
-      // console.log(Analysis.getSentiment({ text: tokenAndStemResult }))
-      // parse the tweets
       returnArr.push({
         created_date: tweet.created_at,
         id: tweet.id,
         text: tweet.text,
         sentiment: sentimentResult
       })
-
-      // TODO: Regis store
-      // if tweet is is currently in database
-      // store it in the redis store
-      // return from regis store`
-      // if tweet is in database and regis store
-      // get from regis store
-
-      const persistedData = await TweetDAO.createTweet({ tweet: tweet.text, tweet_id: tweet.id, ticker: q, tweet_date: tweet.created_at, sentiment: sentimentResult }).catch((error) => { console.log(error) })
-      console.log(persistedData)
+      // if the primary key is already in database, then skip
+      const currentTweet = await TweetDAO.getTweetOnId({ tweet_id: tweet.id }).catch((error) => { console.log(error) })
+      if (currentTweet != null) {
+        continue
+      } else {
+      // Persist the data into the database
+        await TweetDAO.createTweet({ tweet: tweet.text, tweet_id: tweet.id, ticker: q, tweet_date: tweet.created_at, sentiment: sentimentResult }).catch((error) => { console.log(error) })
+      }
     }
     return returnArr
-  },
-
-  createTweet: async function (req, res) {
-    console.log(req.body)
-    const { q, lang, resultType, count } = req.body
-    const twitParams = {
-      q: q,
-      lang: lang,
-      result_type: resultType,
-      count: count
-    }
-    console.log(twitParams)
-    const twitterSearchResults = await client.get('search/tweets', twitParams)
-      .then((response) => {
-        return response
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-
-    for (const tweet of twitterSearchResults.statuses) {
-      // persist the tweets into the SQL database first
-      const resp = await TweetDAO.createTweet({ tweet_id: tweet.id, tweet_date: tweet.created_at, tweet: tweet.text, ticker: req.q }).catch((err) => { console.log(err) })
-      // if the tweets are already in the SQL database, then retrieve them from the cache
-      console.log(resp)
-    }
   },
 
   /**
@@ -91,8 +61,7 @@ module.exports = {
    * This retrieve the tweets from the database which have the certain ticker associated to them
    */
   getTweets: async function (req, res) {
-    const { ticker } = req.params
-    return await TweetDAO.getTweets({ ticker: ticker }).catch((error) => {
+    return await TweetDAO.getTweets({ ticker: req.ticker }).catch((error) => {
       console.log(error)
     })
   },

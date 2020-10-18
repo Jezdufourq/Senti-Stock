@@ -6,13 +6,13 @@ const { pool } = require('../config/dbConfig')
 const createTweetsTable = () => {
   const queryText =
   `CREATE TABLE IF NOT EXISTS
-    tweets(tweet_id BIGTINT PRIMARY KEY,
+    tweets(tweet_id BIGINT PRIMARY KEY,
     created_date TIMESTAMP,
     modified_date TIMESTAMP,
     tweet VARCHAR(255),
     ticker VARCHAR(63),
     tweet_date TIMESTAMP,
-    sentiment BIGTINT
+    sentiment BIGINT
     );`
   pool.query(queryText)
     .then((res) => {
@@ -27,7 +27,7 @@ const createTweetsTable = () => {
  * Drop tweets table
  */
 const dropTweetsTable = () => {
-  const queryText = 'DROP TABLE IF EXISTS tweets returning *;'
+  const queryText = 'DROP TABLE IF EXISTS tweets;'
   pool.query(queryText)
     .then((res) => {
       console.log(res)
@@ -62,43 +62,7 @@ const createTickersTable = () => {
  * Drop tweets table
  */
 const dropTickersTable = () => {
-  const queryText = 'DROP TABLE IF EXISTS tweets returning *;'
-  pool.query(queryText)
-    .then((res) => {
-      console.log(res)
-    })
-    .catch((err) => {
-      console.log(err)
-    })
-}
-
-/**
- * Create sentiment table
- */
-const createSentimentTable = () => {
-  const queryText =
-  `CREATE TABLE IF NOT EXISTS
-  sentiment(id UUID PRIMARY KEY,
-    created_date TIMESTAMP,
-    modified_date TIMESTAMP,
-    analysis VARCHAR(63),
-    ticker VARCHAR(63),
-    exchange VARCHAR(63)
-    );`
-  pool.query(queryText)
-    .then((res) => {
-      console.log(res)
-    })
-    .catch((err) => {
-      console.log(err)
-    })
-}
-
-/**
- * Drop sentiment table
- */
-const dropSentimentTable = () => {
-  const queryText = 'DROP TABLE IF EXISTS sentiment returning *;'
+  const queryText = 'DROP TABLE IF EXISTS tickers;'
   pool.query(queryText)
     .then((res) => {
       console.log(res)
@@ -113,7 +77,6 @@ const dropSentimentTable = () => {
  */
 const createAllTables = () => {
   createTweetsTable()
-  createSentimentTable()
   createTickersTable()
 }
 
@@ -122,7 +85,6 @@ const createAllTables = () => {
   */
 const dropAllTables = () => {
   dropTweetsTable()
-  dropSentimentTable()
   dropTickersTable()
 }
 

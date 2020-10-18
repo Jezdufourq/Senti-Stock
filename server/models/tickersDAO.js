@@ -10,12 +10,9 @@ const tickersDAO = {
     const queryText = 'SELECT * FROM tickers'
     try {
       const { rows } = await pool.query(queryText)
-      if (!rows[0]) {
-        res.status(400).send({ message: 'There are currently no entries in the database for the current tickers' })
-      }
       return rows
     } catch (error) {
-      res.status(500).send('Error')
+      return res.status(500).send('Error')
     }
   },
 

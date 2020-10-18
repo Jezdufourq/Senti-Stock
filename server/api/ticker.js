@@ -1,7 +1,6 @@
 var express = require('express')
 const asyncHandler = require('express-async-handler')
 var router = express.Router()
-const { tickersDAO } = require('../models/tickersDAO')
 const Ticker = require('../controllers/tickerUtil')
 const Cache = require('../controllers/cache')
 const redis = require('redis')
@@ -17,7 +16,7 @@ router.get('/current-tickers', asyncHandler(async function (req, res, next) {
   return client.get(tickerKey, async function (error, result) {
     if (error) {
       console.log(error)
-      return error
+      return res.status(500)
     }
     if (result) {
       console.log('cache')
@@ -25,8 +24,8 @@ router.get('/current-tickers', asyncHandler(async function (req, res, next) {
       return res.status(200).json(resultJSON)
     } else {
       console.log('db')
-      const currentTickers = await tickersDAO.getTickers()
-      res.status(200).send(currentTickers)
+      const result = await Ticker.getCurrentTickers()
+      return res.status(200).json(result)
     }
   })
 }))
