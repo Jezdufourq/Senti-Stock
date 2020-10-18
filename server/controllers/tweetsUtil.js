@@ -11,11 +11,11 @@ var client = new Twit({
   access_token_secret: process.env.TWITTER_ACCESS_SECRET
 })
 
-const Tweet = {
+module.exports = {
   /**
-   * fetch tweets
+   * Fetch tweet function
    */
-  async fetchTweets (req, res) {
+  fetchTweets: async function (req, res) {
     const { q, lang, result_type, count } = req
     const returnArr = []
     const twitParams = {
@@ -60,7 +60,7 @@ const Tweet = {
     return returnArr
   },
 
-  async createTweet (req, res) {
+  createTweet: async function (req, res) {
     console.log(req.body)
     const { q, lang, resultType, count } = req.body
     const twitParams = {
@@ -86,7 +86,11 @@ const Tweet = {
     }
   },
 
-  async getTweets (req, res) {
+  /**
+   * Get tweets function
+   * This retrieve the tweets from the database which have the certain ticker associated to them
+   */
+  getTweets: async function (req, res) {
     const { ticker } = req.params
     return await TweetDAO.getTweets({ ticker: ticker }).catch((error) => {
       console.log(error)
@@ -94,27 +98,11 @@ const Tweet = {
   },
 
   /**
-   * Get tweet data
-   * This should accept a date range
+   * Returns the tweets between a certain date range
    */
-  async getTweetsBetweenDates (req, res) {
+  getTweetsBetweenDates: async function (req, res) {
     return await TweetDAO.getTweetsBetweenDates({ end_date: req.start_date, start_date: req.end_date, ticker: req.ticker }).catch((error) => {
       console.log(error)
     })
-    // if the tweets are in the database, store in the redis cache
-  },
-
-  /**
-   * clean tweet data
-   */
-  cleanTweetData (req, res) {
-    const tweetArr = []
-    req.data.forEach((element) => {
-      tweetArr.push(element.tweet)
-    })
-    return tweetArr
   }
-}
-module.exports = {
-  Tweet
 }

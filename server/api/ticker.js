@@ -2,6 +2,7 @@ var express = require('express')
 const asyncHandler = require('express-async-handler')
 var router = express.Router()
 const { tickersDAO } = require('../models/tickersDAO')
+const Ticker = require('../controllers/tickerUtil')
 const Cache = require('../controllers/cache')
 const redis = require('redis')
 const client = redis.createClient()
@@ -9,7 +10,6 @@ const client = redis.createClient()
 /**
  * Get current stored tickers for tweets
  */
-
 router.get('/current-tickers', asyncHandler(async function (req, res, next) {
   // check in the cache
   // if not there, check in the database
@@ -37,8 +37,8 @@ router.get('/current-tickers', asyncHandler(async function (req, res, next) {
 router.post('/current-ticker', asyncHandler(async function (req, res, next) {
   const { ticker, exchange } = req.body
   // persist into the database
-  await tickersDAO.createTicker({ ticker: ticker, exchange: exchange })
-  const currentTickers = await tickersDAO.getTickers()
+  await Ticker.createTicker({ ticker: ticker, exchange: exchange })
+  const currentTickers = await Ticker.getCurrentTickers()
   // store the database entries into the cache
   Cache.createCurrentTickers({ data: currentTickers })
   res.status(200).send(currentTickers)

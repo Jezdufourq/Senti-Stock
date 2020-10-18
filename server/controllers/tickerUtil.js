@@ -1,13 +1,10 @@
-const redis = require('redis')
-const REDIS_PORT = process.env.PORT || 6379
-const client = redis.createClient(REDIS_PORT)
-
-const Ticker = {
-  createRedisStore (req, res) {
-    const redisKey = 'current-tickers'
-  }
-}
+const { tickersDAO } = require('../models/tickersDAO')
 
 module.exports = {
-  Ticker
+  getCurrentTickers: async function (req, res) {
+    return tickersDAO.getTickers()
+  },
+  createTicker: async function (req, res) {
+    tickersDAO.createTicker({ ticker: req.ticker, exchange: req.exchange })
+  }
 }
