@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <div class="col-auto q-pa-md">
-      <div style="width:500px">
+      <div style="width:500px" class="full-height">
         <q-card class="full-height">
           <div class="row items-center">
             <div class="text-h3 q-pa-md text-left text-bold">Your Tickers</div>
@@ -9,12 +9,22 @@
               <q-btn color="primary" text-color="white" label="Add Ticker" @click="dialog = true" />
               <q-dialog v-model="dialog">
                 <div v-if="loadingState" class="col" style="width:500px; height:300px">
-                      <loading />
-                    </div>
+                  <loading />
+                </div>
                 <q-card>
                   <div class="q-pa-md row items-center">
                     <div class="col" style="width:500px" v-if="!loadingState">
-                      <div class="text-h5 text-bold">Click on a ticker</div>
+                      <div class="text-h5 text-bold">Click or Search for a ticker</div>
+                      <div class="row items-center q-pa-md">
+                        <q-input
+                          outlined
+                          debounce="500"
+                          class="full-width"
+                          label="Search for Stock Ticker"
+                          @input="searchTickerQuery"
+                          clearable
+                        ></q-input>
+                      </div>
                       <div class="q-py-md">
                         <q-table
                           color="primary"
@@ -39,13 +49,18 @@
             class="q-pa-md"
             style="height:200px"
           >You need to search some tickers. Click Add Ticker.</div>
-          <div class="list scroll q-pa-md" style="height:200px">
+          <div class="list scroll q-pa-md">
             <q-list>
               <q-item v-for="ticker in currentStockTickers" :key="ticker.ticker_id" clickable>
                 <q-item-section class="text-body text-bold">{{ ticker.ticker }}</q-item-section>
                 <q-item-section class="text-body text-bold">{{ ticker.exchange }}</q-item-section>
                 <q-item-section side>
-                  <q-icon name="delete" color="red" class="cursor-pointer" @click="deleteTicker(ticker.ticker_id)"/>
+                  <q-icon
+                    name="delete"
+                    color="red"
+                    class="cursor-pointer"
+                    @click="deleteTicker(ticker.ticker_id)"
+                  />
                 </q-item-section>
               </q-item>
             </q-list>
@@ -54,14 +69,19 @@
       </div>
     </div>
     <div class="col-auto q-pa-md">
-      <q-card class="q-pa-md full-height    ">
+      <q-card class="q-pa-md full-height">
         <q-card-section>
           <div class="text-h3 q-pa-md text-left text-bold">Your Chart</div>
-          <q-btn color="primary" text-color="white" label="Analyze Tickers" @click="analyzeTickers()" />
+          <q-btn
+            color="primary"
+            text-color="white"
+            label="Analyze Tickers"
+            @click="analyzeTickers()"
+          />
         </q-card-section>
         <q-card-section>
           <div class="small">
-            <line-chart :chart-data="datacollection" :options="options"></line-chart>
+            <line-chart :chart-data="chartData" :options="chartOptions"></line-chart>
           </div>
         </q-card-section>
       </q-card>
@@ -82,8 +102,8 @@ export default {
     return {
       datacollection: null,
       currentTickers: [],
-      chartData: [],
-      options: {
+      chartData: {},
+      chartOptions: {
         gridLines: {
           display: true
         },
@@ -95,7 +115,7 @@ export default {
               time: {
                 unit: 'day',
                 displayFormats: {
-                  quarter: 'hA D MMM YYYY'
+                  quarter: 'DD MM YYYY h:mm:ss.SSS a'
                 }
               }
             }
@@ -139,7 +159,6 @@ export default {
   mounted () {
     // on mounted, it needs to go out and fetch the current tickers from the database
     this.loadingState = true
-    this.resetData()
     axios
       .get('api/ticker/current-tickers')
       .then((response) => {
@@ -149,7 +168,9 @@ export default {
       .catch((error) => {
         console.log(error)
       })
-      .finally(() => {})
+      .finally(() => {
+        this.loadHistoricalAnalysis()
+      })
     axios
       .get('api/tradingview/search-top-tickers')
       .then((response) => {
@@ -161,78 +182,104 @@ export default {
       .finally(() => {
         this.loadingState = false
       })
-
-    this.fillData()
-    // when chart is mounted, it should pull the data from the serve
-
-    // this.currentTickers.forEach((ticker) => {
-    //   promiseArr.push(axios.get(`api/tweets/analysis/$${ticker}`))
-    // })
   },
   methods: {
-    analyzeTickers () {
+    loadHistoricalAnalysis () {
       var tickerPromiseArr = []
+      var updatedChartData = []
       console.log(this.currentStockTickers)
       if (this.currentStockTickers.length != null) {
         this.currentStockTickers.forEach((tickers) => {
-          tickerPromiseArr.push(axios.post('api/tweets/analysis', { ticker: tickers.ticker }))
+          tickerPromiseArr.push(
+            axios.get(`api/tweets/analysis/${tickers.ticker}`)
+          )
         })
       } else {
         // TODO: throw an error saying that you cant analyze any tickers
       }
       Promise.all(tickerPromiseArr)
         .then((response) => {
-          console.log(response)
+          response.forEach((tweetData) => {
+            updatedChartData.push(
+              this.updateChart(tweetData.data.tweets, tweetData.data.query)
+            )
+            console.log(tweetData)
+          })
         })
         .catch((error) => {
           console.log(error)
         })
+        .finally(() => {
+          this.chartData = {
+            datasets: updatedChartData
+          }
+        })
+    },
+    loadHistoricalChart (tweetData, ticker) {
+      var data = []
+      tweetData.forEach((tweets) => {
+        console.log(`tweet date ${tweets.tweet_date}`)
+        console.log(`sentiment ${tweets.sentiment}`)
+        data.push({ t: tweets.tweet_date, y: tweets.sentiment })
+      })
+      var returnObj = {
+        label: ticker,
+        borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+        fill: false,
+        data: data
+      }
+      return returnObj
+    },
+    analyzeTickers () {
+      var tickerPromiseArr = []
+      var updatedChartData = []
+      console.log(this.currentStockTickers)
+      if (this.currentStockTickers.length != null) {
+        this.currentStockTickers.forEach((tickers) => {
+          tickerPromiseArr.push(
+            axios.post('api/tweets/analysis', { ticker: tickers.ticker })
+          )
+        })
+      } else {
+        // TODO: throw an error saying that you cant analyze any tickers
+      }
+      Promise.all(tickerPromiseArr)
+        .then((response) => {
+          response.forEach((tweetData) => {
+            updatedChartData.push(this.updateChart(tweetData.data))
+            console.log(updatedChartData)
+          })
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+        .finally(() => {
+          this.chartData = {
+            datasets: updatedChartData
+          }
+        })
+    },
+    updateChart (tweetData) {
+      var data = []
+      var tickerName = ''
+      tweetData.forEach((tweets) => {
+        console.log(`tweet date ${tweets.tweet_date}`)
+        console.log(`sentiment ${tweets.sentiment}`)
+        data.push({ t: tweets.tweet_date, y: tweets.sentiment })
+        tickerName = tweets.ticker
+      })
+      var returnObj = {
+        label: tickerName,
+        borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+        fill: false,
+        data: data
+      }
+      return returnObj
     },
     resetData () {
       this.currentStockTickers = []
     },
-    fillData () {
-      this.datacollection = {
-        datasets: [
-          {
-            label: 'Data One',
-            borderColor: '#00A2BF',
-            fill: false,
-            data: [
-              {
-                t: new Date(2020, 10, 10, 10, 10, 10, 10),
-                y: this.getRandomInt()
-              },
-              {
-                t: new Date(2020, 10, 11, 10, 10, 10, 10),
-                y: this.getRandomInt()
-              }
-            ]
-          },
-          {
-            label: 'Data One',
-            borderColor: '#f87979',
-            fill: false,
-            data: [
-              {
-                t: new Date(2020, 10, 10, 10, 10, 10, 10),
-                y: this.getRandomInt()
-              },
-              {
-                t: new Date(2020, 10, 11, 10, 10, 10, 10),
-                y: this.getRandomInt()
-              }
-            ]
-          }
-        ]
-      }
-    },
-    getRandomInt () {
-      return Math.floor(Math.random() * (50 - 5 + 1)) + 5
-    },
-    addTickers () {
-      // make an axios call, update the chart data
-    },
+    fillData () {},
     updateTicker (ticker, exchange) {
       this.tickers.push({ ticker: ticker, exchange: exchange })
       console.log(this.tickers)
@@ -268,7 +315,8 @@ export default {
     },
     deleteTicker (tickerId) {
       console.log(tickerId)
-      axios.delete(`api/ticker/delete-ticker/${tickerId}`)
+      axios
+        .delete(`api/ticker/delete-ticker/${tickerId}`)
         .then((response) => {
           this.currentStockTickers = response.data
         })
@@ -276,6 +324,40 @@ export default {
           console.log(error)
         })
     }
+    // this.datacollection = {
+    //         datasets: [
+    //           {
+    //             label: 'Data One',
+    //             borderColor: '#00A2BF',
+    //             fill: false,
+    //             data: [
+    //               {
+    //                 t: new Date(2020, 10, 10, 10, 10, 10, 10),
+    //                 y: this.getRandomInt()
+    //               },
+    //               {
+    //                 t: new Date(2020, 10, 11, 10, 10, 10, 10),
+    //                 y: this.getRandomInt()
+    //               }
+    //             ]
+    //           },
+    //           {
+    //             label: 'Data One',
+    //             borderColor: '#f87979',
+    //             fill: false,
+    //             data: [
+    //               {
+    //                 t: new Date(2020, 10, 10, 10, 10, 10, 10),
+    //                 y: this.getRandomInt()
+    //               },
+    //               {
+    //                 t: new Date(2020, 10, 11, 10, 10, 10, 10),
+    //                 y: this.getRandomInt()
+    //               }
+    //             ]
+    //           }
+    //         ]
+    //       }
   }
 }
 </script>
