@@ -56,12 +56,12 @@
     <div class="col-auto q-pa-md">
       <q-card class="q-pa-md full-height    ">
         <q-card-section>
-          <div class="text-h4 text-bold">Test Chart</div>
+          <div class="text-h3 q-pa-md text-left text-bold">Your Chart</div>
+          <q-btn color="primary" text-color="white" label="Analyze Tickers" @click="analyzeTickers()" />
         </q-card-section>
         <q-card-section>
           <div class="small">
             <line-chart :chart-data="datacollection" :options="options"></line-chart>
-            <button @click="fillData()">Randomize</button>
           </div>
         </q-card-section>
       </q-card>
@@ -170,6 +170,9 @@ export default {
     // })
   },
   methods: {
+    analyzeTickers () {
+
+    },
     resetData () {
       this.currentStockTickers = []
     },
