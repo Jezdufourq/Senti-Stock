@@ -13,7 +13,6 @@ module.exports = {
     const tickerKey = 'current-tickers'
     const tickers = req.data
     return client.setex(tickerKey, 3600, JSON.stringify({
-      source: 'Postgres Current Tickers Cache',
       tickers
     }), function (error, result) {
       if (error) {
@@ -39,7 +38,6 @@ module.exports = {
     const ticker = req.ticker
     const tweets = req.data
     client.setex(ticker, 3600, JSON.stringify({
-      source: 'Postgres Current Tweet Cache',
       query: ticker,
       tweets
     }), function (error, result) {

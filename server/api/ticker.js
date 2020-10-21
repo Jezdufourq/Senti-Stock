@@ -38,8 +38,25 @@ router.post('/current-ticker', asyncHandler(async function (req, res, next) {
   // persist into the database
   await Ticker.createTicker({ ticker: ticker, exchange: exchange })
   const currentTickers = await Ticker.getCurrentTickers()
+  console.log(currentTickers)
   // store the database entries into the cache
   Cache.createCurrentTickers({ data: currentTickers })
+  res.status(200).send(currentTickers)
+}))
+
+/**
+ * delete a ticker from the database, update the cache
+ */
+router.delete('/delete-ticker/:tickerId', asyncHandler(async function (req, res, next) {
+  const { tickerId } = req.params
+  console.log(tickerId)
+  // deleting ticker
+  await Ticker.deleteTicker({ tickerId: tickerId })
+  // getting the current tickers
+  const currentTickers = await Ticker.getCurrentTickers()
+  // store the database entries into the cache
+  Cache.createCurrentTickers({ data: currentTickers })
+
   res.status(200).send(currentTickers)
 }))
 

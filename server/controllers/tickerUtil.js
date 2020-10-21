@@ -2,9 +2,12 @@ const { tickersDAO } = require('../models/tickersDAO')
 
 module.exports = {
   getCurrentTickers: async function (req, res) {
-    return tickersDAO.getTickers()
+    return await tickersDAO.getTickers()
   },
   createTicker: async function (req, res) {
-    tickersDAO.createTicker({ ticker: req.ticker, exchange: req.exchange })
+    await tickersDAO.createTicker({ ticker: req.ticker, exchange: req.exchange })
+  },
+  deleteTicker: async function (req, res) {
+    await tickersDAO.deleteTicker({ tickerId: req.tickerId })
   }
 }

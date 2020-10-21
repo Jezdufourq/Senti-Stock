@@ -38,7 +38,7 @@ router.get('/analysis/:ticker', asyncHandler(async function (req, res, next) {
  * response - all of the sentiment for the stock
  */
 router.post('/analysis', asyncHandler(async function (req, res, next) {
-  const { ticker, settings } = req.body
+  const { ticker } = req.body
   // checking to see if the ticker is a valid ticker
   var tradingViewResp = await tradingViewUtil.searchStockTickers(ticker).catch((error) => { console.log(error) })
   if (tradingViewResp.length === 0) {
@@ -47,7 +47,7 @@ router.post('/analysis', asyncHandler(async function (req, res, next) {
     next(err)
   }
   // creating the analysis and persisting into the database
-  await Tweets.createTweetsAnalysis({ q: ticker, lang: settings.lang, count: settings.count, result_type: settings.result_type })
+  await Tweets.createTweetsAnalysis({ q: ticker, lang: 'en', count: 100, result_type: 'recent' })
   // get all of the tweetsSentiment (including historical - using database)
   const tweetsSentiment = await Tweets.getTweets({ ticker: ticker })
   // persisting into the redis cache

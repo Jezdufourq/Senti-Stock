@@ -14,22 +14,17 @@
       <div class="col-4 q-px-md">
         <tweets-component />
       </div>
-      <div class="col-6 q-px-md">
-        <chart-component />
-      </div>
     </div>
   </q-page>
 </template>
 
 <script>
 import tweetsComponent from '../components/tweetsComponent'
-import chartComponent from '../components/chartComponent'
 
 export default {
   name: 'Analysis',
   components: {
-    tweetsComponent,
-    chartComponent
+    tweetsComponent
   }
 
 }
