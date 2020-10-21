@@ -12,7 +12,7 @@ const createTweetsTable = () => {
     tweet VARCHAR(255),
     ticker VARCHAR(63),
     tweet_date TIMESTAMP,
-    sentiment BIGINT
+    sentiment FLOAT8
     );`
   pool.query(queryText)
     .then((res) => {

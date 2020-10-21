@@ -38,6 +38,7 @@ module.exports = {
       const tokenAndStemResult = Parser.tokenAndStemTweets({ text: tweet.text })
       // perform some sentiment analysis
       const sentimentResult = Analysis.getSentiment({ text: tokenAndStemResult })
+      console.log(`sentimentResult: ${sentimentResult}`)
       returnArr.push({
         created_date: tweet.created_at,
         id: tweet.id,

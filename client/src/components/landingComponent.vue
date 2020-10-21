@@ -8,11 +8,11 @@
             <div class="col-auto">
               <q-btn color="primary" text-color="white" label="Add Ticker" @click="dialog = true" />
               <q-dialog v-model="dialog">
-                <q-card>
-                  <div class="q-pa-md row items-center">
-                    <div v-if="loadingState" class="col" style="width:500px; height:300px">
+                <div v-if="loadingState" class="col" style="width:500px; height:300px">
                       <loading />
                     </div>
+                <q-card>
+                  <div class="q-pa-md row items-center">
                     <div class="col" style="width:500px" v-if="!loadingState">
                       <div class="text-h5 text-bold">Click on a ticker</div>
                       <div class="q-py-md">
@@ -104,7 +104,7 @@ export default {
       },
       items: [],
       dialog: false,
-      loadingState: false,
+      loadingState: true,
       currentStockTickers: null,
       stockTickerSearch: [],
       tickers: [],
@@ -171,7 +171,22 @@ export default {
   },
   methods: {
     analyzeTickers () {
-
+      var tickerPromiseArr = []
+      console.log(this.currentStockTickers)
+      if (this.currentStockTickers.length != null) {
+        this.currentStockTickers.forEach((tickers) => {
+          tickerPromiseArr.push(axios.post('api/tweets/analysis', { ticker: tickers.ticker }))
+        })
+      } else {
+        // TODO: throw an error saying that you cant analyze any tickers
+      }
+      Promise.all(tickerPromiseArr)
+        .then((response) => {
+          console.log(response)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     },
     resetData () {
       this.currentStockTickers = []
