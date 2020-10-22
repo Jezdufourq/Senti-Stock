@@ -25,6 +25,8 @@ router.get('/current-tickers', asyncHandler(async function (req, res, next) {
     } else {
       console.log('db')
       const result = await Ticker.getCurrentTickers()
+      // update cache
+      Cache.createCurrentTickers({ data: result })
       return res.status(200).json(result)
     }
   })

@@ -225,7 +225,9 @@ export default {
       var returnObj = {
         label: ticker,
         borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-        fill: false,
+        fill: true,
+        lineTension: 0.5,
+        pointRadius: 0.1,
         data: data
       }
       return returnObj
@@ -271,7 +273,9 @@ export default {
       var returnObj = {
         label: tickerName,
         borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-        fill: false,
+        fill: true,
+        lineTension: 0.5,
+        pointRadius: 0.1,
         data: data
       }
       return returnObj
