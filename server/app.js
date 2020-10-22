@@ -1,9 +1,6 @@
-const createError = require('http-errors')
 const path = require('path')
 const express = require('express')
 const port = process.env.PORT || 3000
-
-require('dotenv').config()
 
 // Middleware
 const helmet = require('helmet')
@@ -21,8 +18,15 @@ const tradingviewRouter = require('./api/tradingview')
 const tickerRouter = require('./api/ticker')
 const adminRouter = require('./api/admin')
 
+// Database tables
+const db = require('./models/db')
+
 // Init app
 const app = express()
+
+// dotenv
+const dotenv = require('dotenv')
+dotenv.config()
 
 // setting up swaggerJsDoc
 const swaggerOptions = {
@@ -46,7 +50,6 @@ app.use(helmet())
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-// app.use(flash)
 app.use(session({
   secret: 'admin',
   resave: false,
@@ -92,8 +95,9 @@ app.use((error, req, res, next) => {
     stack: error.stack
   })
 })
-
 // Express app
-app.listen(port, () => {
+app.listen(port, async () => {
+  // Create all the tables if they are not there
+  await db.createAllTables()
   console.log(`Example app listening at http://localhost:${port}`)
 })

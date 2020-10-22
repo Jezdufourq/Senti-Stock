@@ -16,5 +16,5 @@ WORKDIR /server
 # Installing server dependicies
 RUN npm i
 # Exposing port and running express application
-EXPOSE 3000
-CMD ["npm", "start"]
+EXPOSE 8000
+CMD ["npm", "run", "prod"]

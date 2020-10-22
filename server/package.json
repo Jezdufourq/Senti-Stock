@@ -1,15 +1,15 @@
 {
-  "name": "webapp-boilerplate",
-  "version": "0.0.1",
-  "description": "This is a boilerplate for a web application using vue, node and express",
-  "productName": "Web App Boilerplate",
+  "name": "SentiStock",
+  "version": "0.2.0",
+  "description": "A web application to grab the sentiment on a selection of stock tickers",
+  "productName": "SentiStock",
   "author": "Jeremiah dufourq <jezdufourq@gmail.com>",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
-    "dev": "nodemon app.js",
-    "start": "node app.js"
+    "dev": "NODE_ENV=development nodemon -r dotenv/config app.js",
+    "prod": "NODE_ENV=production node -r dotenv/config app.js"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
@@ -17,6 +17,7 @@
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "compromise": "^13.5.0",
+    "connect-redis": "^5.0.0",
     "cookie-parser": "^1.4.5",
     "core-js": "^3.6.5",
     "cors": "^2.8.5",

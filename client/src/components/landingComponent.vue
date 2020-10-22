@@ -199,6 +199,7 @@ export default {
       }
       Promise.all(tickerPromiseArr)
         .then((response) => {
+          console.log(response)
           response.forEach((tweetData) => {
             updatedChartData.push(
               this.updateChart(tweetData.data.tweets, tweetData.data.query)
@@ -248,7 +249,7 @@ export default {
       Promise.all(tickerPromiseArr)
         .then((response) => {
           response.forEach((tweetData) => {
-            updatedChartData.push(this.updateChart(tweetData.data))
+            updatedChartData.push(this.updateChart(tweetData.data.tweets, tweetData.data.query))
             console.log(updatedChartData)
           })
         })
@@ -307,7 +308,7 @@ export default {
           exchange: row.exchange
         })
         .then((response) => {
-          this.currentStockTickers = response.data
+          this.currentStockTickers = response.data.tickers
           console.log(response)
         })
         .catch((error) => {

@@ -1,8 +1,25 @@
-const redis = require('redis')
-// const REDIS_PORT = process.env.PORT || 6379
-const client = redis.createClient()
-// client.on('error', (err) => {
-//   console.log('Error ' + err)
+
+const { redisClient } = require('../config/cacheConfig')
+// const client = redis.createClient('redis://n9960651-cache-001.km2jzi.0001.apse2.cache.amazonaws.com', {
+//   no_ready_check: true,
+//   retry_strategy: function (options) {
+//     if (options.error && options.error.code === 'ECONNREFUSED') {
+//     // End reconnecting on a specific error and flush all commands with
+//     // a individual error
+//       return new Error('The server refused the connection')
+//     }
+//     if (options.total_retry_time > 1000 * 60 * 60) {
+//     // End reconnecting after a specific timeout and flush all commands
+//     // with a individual error
+//       return new Error('Retry time exhausted')
+//     }
+//     if (options.attempt > 10) {
+//     // End reconnecting with built in error
+//       return undefined
+//     }
+//     // reconnect after
+//     return Math.min(options.attempt * 100, 3000)
+//   }
 // })
 
 module.exports = {
@@ -12,7 +29,7 @@ module.exports = {
   createCurrentTickers: function (req, res) {
     const tickerKey = 'current-tickers'
     const tickers = req.data
-    return client.setex(tickerKey, 3600, JSON.stringify({
+    return redisClient.setex(tickerKey, 3600, JSON.stringify({
       tickers
     }), function (error, result) {
       if (error) {
@@ -24,7 +41,7 @@ module.exports = {
   },
   getCurrentTickers: function (req, res) {
     const tickerKey = 'current-tickers'
-    client.get(tickerKey, function (error, result) {
+    redisClient.get(tickerKey, function (error, result) {
       if (error) {
         console.log(error)
         return error
@@ -37,7 +54,7 @@ module.exports = {
   createTweets: function (req) {
     const ticker = req.ticker
     const tweets = req.data
-    client.setex(ticker, 3600, JSON.stringify({
+    redisClient.setex(ticker, 3600, JSON.stringify({
       query: ticker,
       tweets
     }), function (error, result) {
@@ -52,7 +69,7 @@ module.exports = {
   },
 
   deleteCache: function (req, res) {
-    client.flushdb(function (err, succeeded) {
+    redisClient.flushdb(function (err, succeeded) {
       if (err) {
         console.log(err)
         return res.status(500).send('The cache failed to flush')

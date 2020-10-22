@@ -92,5 +92,3 @@ module.exports = {
   createAllTables,
   dropAllTables
 }
-
-require('make-runnable')
