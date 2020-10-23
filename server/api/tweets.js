@@ -2,13 +2,12 @@
 var express = require('express')
 const asyncHandler = require('express-async-handler')
 var router = express.Router()
+const redisClient = require('../config/cacheConfig')
 
 // util import
 const Tweets = require('../controllers/tweetsUtil')
 const Cache = require('../controllers/cache')
 const tradingViewUtil = require('../controllers/tradingviewUtil')
-const redis = require('redis')
-const client = redis.createClient()
 
 /**
  * Gets the data for the current stock ticker (this includes the sentiment)
@@ -16,7 +15,7 @@ const client = redis.createClient()
  */
 router.get('/analysis/:ticker', asyncHandler(async function (req, res, next) {
   const { ticker } = req.params
-  return client.get(ticker, async function (error, result) {
+  return redisClient.get(ticker, async function (error, result) {
     if (error) {
       console.log(error)
       return res.status(500)
@@ -28,7 +27,7 @@ router.get('/analysis/:ticker', asyncHandler(async function (req, res, next) {
     } else {
       console.log('db')
       const tweetsResult = await Tweets.getTweets({ ticker: ticker })
-      // Cache.createTweets({ ticker: ticker, data: tweetsResult })
+      Cache.createTweets({ ticker: ticker, data: tweetsResult })
       res.status(200).send({ query: ticker, tweets: tweetsResult })
     }
   })
@@ -52,7 +51,7 @@ router.post('/analysis', asyncHandler(async function (req, res, next) {
   // get all of the tweetsSentiment (including historical - using database)
   const tweetsSentiment = await Tweets.getTweets({ ticker: ticker })
   // persisting into the redis cache
-  // Cache.createTweets({ ticker: ticker, data: tweetsSentiment })
+  Cache.createTweets({ ticker: ticker, data: tweetsSentiment })
   res.status(200).send({ query: ticker, tweets: tweetsSentiment })
 }))
 

@@ -13,21 +13,20 @@ const path = require('path')
 const swaggerUI = require('swagger-ui-express')
 const swaggerJsDoc = require('swagger-jsdoc')
 
+// redis
+const redisClient = require('./config/cacheConfig')
+
 // Routes
-const tweetsRouter = require('./api/tweets')
-const tradingviewRouter = require('./api/tradingview')
-const tickerRouter = require('./api/ticker')
-const adminRouter = require('./api/admin')
+// const tweetsRouter = require('./api/tweets')
+// const tradingviewRouter = require('./api/tradingview')
+// const tickerRouter = require('./api/ticker')
+// const adminRouter = require('./api/admin')
 
 // Database tables
 const db = require('./models/db')
 
 // Init app
 const app = express()
-
-// Redis
-const redis = require('redis')
-
 // setting up swaggerJsDoc
 const swaggerOptions = {
   swaggerDefinition: {
@@ -43,21 +42,6 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions)
 
 // SPA static assets
 app.use(express.static('../client/dist/spa'))
-
-// Middleware
-// Database and redis middleware
-const redisClient = redis.createClient({
-  port: isProduction ? process.env.REDIS_PORT_PROD : process.env.REDIS_PORT_DEV,
-  host: isProduction ? process.env.REDIS_HOST_PROD : process.env.REDIS_HOST_DEV
-})
-
-redisClient.on('connect', function () {
-  console.log(`redis has connected with the following information. Port: ${isProduction ? process.env.REDIS_PORT_PROD : process.env.REDIS_PORT_DEV}, Host: ${isProduction ? process.env.REDIS_HOST_PROD : process.env.REDIS_HOST_DEV}`)
-})
-
-redisClient.on('error', function (err) {
-  console.log('Error ' + err)
-})
 
 // other middleware
 app.use(logger('common'))
@@ -79,10 +63,10 @@ logger.token('res', (req, res) => {
 
 // API routes
 // app.use('/api', analysisRouter)
-app.use('/api/tradingview', tradingviewRouter)
-app.use('/api/ticker', tickerRouter)
-app.use('/api/tweets', tweetsRouter)
-app.use('/api/admin', adminRouter)
+// app.use('/api/tradingview', tradingviewRouter)
+// app.use('/api/ticker', tickerRouter)
+// app.use('/api/tweets', tweetsRouter)
+// app.use('/api/admin', adminRouter)
 // app.use('/api', testRouter)
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
@@ -106,7 +90,7 @@ app.use((error, req, res, next) => {
   })
 })
 // Express app
-app.listen(port, async () => {
+app.listen(port, () => {
   // Create all the tables if they are not there
   // await db.createAllTables()
   console.log(`Example app listening at http://localhost:${port}`)

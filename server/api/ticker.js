@@ -1,10 +1,11 @@
 var express = require('express')
 const asyncHandler = require('express-async-handler')
 var router = express.Router()
-const Ticker = require('../controllers/tickerUtil')
+const redisClient = require('../config/cacheConfig')
+
+// util import
 const Cache = require('../controllers/cache')
-const redis = require('redis')
-const client = redis.createClient()
+const Ticker = require('../controllers/tickerUtil')
 
 /**
  * Get current stored tickers for tweets
@@ -13,7 +14,7 @@ router.get('/current-tickers', asyncHandler(async function (req, res, next) {
   // check in the cache
   // if not there, check in the database
   const tickerKey = 'current-tickers'
-  return client.get(tickerKey, async function (error, result) {
+  return redisClient.get(tickerKey, async function (error, result) {
     if (error) {
       console.log(error)
       return res.status(500)
@@ -26,7 +27,7 @@ router.get('/current-tickers', asyncHandler(async function (req, res, next) {
       console.log('db')
       const result = await Ticker.getCurrentTickers()
       // update cache
-      // Cache.createCurrentTickers({ data: result })
+      Cache.createCurrentTickers({ data: result })
       return res.status(200).json({ tickers: result })
     }
   })
@@ -42,7 +43,7 @@ router.post('/current-ticker', asyncHandler(async function (req, res, next) {
   const currentTickers = await Ticker.getCurrentTickers()
   console.log(currentTickers)
   // store the database entries into the cache
-  // Cache.createCurrentTickers({ data: currentTickers })
+  Cache.createCurrentTickers({ data: currentTickers })
   res.status(200).send({ tickers: currentTickers })
 }))
 
@@ -57,7 +58,7 @@ router.delete('/delete-ticker/:tickerId', asyncHandler(async function (req, res,
   // getting the current tickers
   const currentTickers = await Ticker.getCurrentTickers()
   // store the database entries into the cache
-  // Cache.createCurrentTickers({ data: currentTickers })
+  Cache.createCurrentTickers({ data: currentTickers })
 
   res.status(200).send(currentTickers)
 }))

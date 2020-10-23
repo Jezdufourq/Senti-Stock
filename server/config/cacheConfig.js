@@ -11,14 +11,24 @@ const redisClient = redis.createClient({
   host: isProduction ? process.env.REDIS_HOST_PROD : process.env.REDIS_HOST_DEV
 })
 
-redisClient.on('connect', function () {
+redisClient.on('connect', () => {
   console.log(`redis has connected with the following information. Port: ${isProduction ? process.env.REDIS_PORT_PROD : process.env.REDIS_PORT_DEV}, Host: ${isProduction ? process.env.REDIS_HOST_PROD : process.env.REDIS_HOST_DEV}`)
 })
 
-redisClient.on('error', function (err) {
+redisClient.on('error', () => {
   console.log('Error ' + err)
 })
 
-module.exports = {
-  redisClient
-}
+redisClient.on('ready', () => {
+  console.log('Client connected to redis...')
+})
+
+redisClient.on('end', () => {
+  console.log('Client disconnected from redis...')
+})
+
+process.on('SIGINT', () => {
+  redisClient.quit()
+})
+
+module.exports = redisClient
