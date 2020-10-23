@@ -1,33 +1,16 @@
-var express = require('express')
-var app = express()
-
 const redis = require('redis')
-const session = require('express-session')
 
-const RedisStore = require('connect-redis')(session)
-
-const isProduction = process.env.NODE_ENV === 'production'
-console.log(isProduction ? process.env.REDIS_PORT_PROD : 6379)
-console.log(isProduction ? process.env.REDIS_HOST_PROD : 'localhost')
-
+// const isProduction = process.env.NODE_ENV === 'production'
+// const redisClient = redis.createClient({
+//   port: isProduction ? process.env.REDIS_PORT_PROD : 6379,
+//   host: isProduction ? process.env.REDIS_HOST_PROD : 'localhost'
+// })
 const redisClient = redis.createClient({
-  port: isProduction ? process.env.REDIS_PORT_PROD : 6379,
-  host: isProduction ? process.env.REDIS_HOST_PROD : 'localhost'
+  port: process.env.REDIS_PORT_PROD,
+  host: process.env.REDIS_HOST_PROD
 })
 
-app.use(
-  session({
-    store: new RedisStore({ client: redisClient })
-  })
-)
-
-app.use(function (req, res, next) {
-  if (!req.session) {
-    return next(new Error('The redis session has disconnected'))
-  }
-  next()
+redisClient.on('connect', function () {
+  console.log(`redis has connected with the following information. Port: ${process.env.REDIS_PORT_PROD}, Host: ${process.env.REDIS_HOST_PROD}`)
 })
-
-module.exports = {
-  redisClient
-}
+module.exports = redisClient

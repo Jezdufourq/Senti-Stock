@@ -1,5 +1,5 @@
 
-const { redisClient } = require('../config/cacheConfig')
+const redisClient = require('../config/cacheConfig')
 // const client = redis.createClient('redis://n9960651-cache-001.km2jzi.0001.apse2.cache.amazonaws.com', {
 //   no_ready_check: true,
 //   retry_strategy: function (options) {
