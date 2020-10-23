@@ -1,11 +1,13 @@
-const path = require('path')
+// Express app config
 const express = require('express')
 const port = process.env.PORT || 8000
+const isProduction = process.env.NODE_ENV === 'production'
 
 // Middleware
 const helmet = require('helmet')
 const cors = require('cors')
 const logger = require('morgan')
+const path = require('path')
 
 // Enable Swagger Docs
 const swaggerUI = require('swagger-ui-express')
@@ -23,9 +25,8 @@ const db = require('./models/db')
 // Init app
 const app = express()
 
-// dotenv
-const dotenv = require('dotenv')
-dotenv.config()
+// Redis
+const redis = require('redis')
 
 // setting up swaggerJsDoc
 const swaggerOptions = {
@@ -33,7 +34,7 @@ const swaggerOptions = {
     info: {
       title: 'SentiStock APIs',
       description: 'SentiStock API Information',
-      servers: ['http://localhost:3000']
+      servers: ['http://localhost:8000']
     }
   },
   apis: ['./routes/*.js']
@@ -44,6 +45,21 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions)
 app.use(express.static('../client/dist/spa'))
 
 // Middleware
+// Database and redis middleware
+const redisClient = redis.createClient({
+  port: isProduction ? process.env.REDIS_PORT_PROD : process.env.REDIS_PORT_DEV,
+  host: isProduction ? process.env.REDIS_HOST_PROD : process.env.REDIS_HOST_DEV
+})
+
+redisClient.on('connect', function () {
+  console.log(`redis has connected with the following information. Port: ${isProduction ? process.env.REDIS_PORT_PROD : process.env.REDIS_PORT_DEV}, Host: ${isProduction ? process.env.REDIS_HOST_PROD : process.env.REDIS_HOST_DEV}`)
+})
+
+redisClient.on('error', function (err) {
+  console.log('Error ' + err)
+})
+
+// other middleware
 app.use(logger('common'))
 app.use(helmet())
 app.use(cors())
@@ -92,6 +108,6 @@ app.use((error, req, res, next) => {
 // Express app
 app.listen(port, async () => {
   // Create all the tables if they are not there
-  await db.createAllTables()
+  // await db.createAllTables()
   console.log(`Example app listening at http://localhost:${port}`)
 })

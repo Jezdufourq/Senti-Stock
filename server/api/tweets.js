@@ -28,7 +28,7 @@ router.get('/analysis/:ticker', asyncHandler(async function (req, res, next) {
     } else {
       console.log('db')
       const tweetsResult = await Tweets.getTweets({ ticker: ticker })
-      Cache.createTweets({ ticker: ticker, data: tweetsResult })
+      // Cache.createTweets({ ticker: ticker, data: tweetsResult })
       res.status(200).send({ query: ticker, tweets: tweetsResult })
     }
   })
@@ -52,7 +52,7 @@ router.post('/analysis', asyncHandler(async function (req, res, next) {
   // get all of the tweetsSentiment (including historical - using database)
   const tweetsSentiment = await Tweets.getTweets({ ticker: ticker })
   // persisting into the redis cache
-  Cache.createTweets({ ticker: ticker, data: tweetsSentiment })
+  // Cache.createTweets({ ticker: ticker, data: tweetsSentiment })
   res.status(200).send({ query: ticker, tweets: tweetsSentiment })
 }))
 

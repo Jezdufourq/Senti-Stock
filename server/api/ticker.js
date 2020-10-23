@@ -26,7 +26,7 @@ router.get('/current-tickers', asyncHandler(async function (req, res, next) {
       console.log('db')
       const result = await Ticker.getCurrentTickers()
       // update cache
-      Cache.createCurrentTickers({ data: result })
+      // Cache.createCurrentTickers({ data: result })
       return res.status(200).json({ tickers: result })
     }
   })
@@ -42,7 +42,7 @@ router.post('/current-ticker', asyncHandler(async function (req, res, next) {
   const currentTickers = await Ticker.getCurrentTickers()
   console.log(currentTickers)
   // store the database entries into the cache
-  Cache.createCurrentTickers({ data: currentTickers })
+  // Cache.createCurrentTickers({ data: currentTickers })
   res.status(200).send({ tickers: currentTickers })
 }))
 
@@ -57,7 +57,7 @@ router.delete('/delete-ticker/:tickerId', asyncHandler(async function (req, res,
   // getting the current tickers
   const currentTickers = await Ticker.getCurrentTickers()
   // store the database entries into the cache
-  Cache.createCurrentTickers({ data: currentTickers })
+  // Cache.createCurrentTickers({ data: currentTickers })
 
   res.status(200).send(currentTickers)
 }))
