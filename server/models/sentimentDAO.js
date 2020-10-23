@@ -1,7 +1,7 @@
 const Helper = require('../controllers/helper')
 const moment = require('moment')
 const uuidv4 = require('uuid/v4')
-const { pool } = require('../config/dbConfig')
+const pool = require('../config/dbConfig')
 
 const User = {
   /**
