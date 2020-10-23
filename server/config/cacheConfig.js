@@ -15,7 +15,7 @@ redisClient.on('connect', () => {
   console.log(`redis has connected with the following information. Port: ${isProduction ? process.env.REDIS_PORT_PROD : process.env.REDIS_PORT_DEV}, Host: ${isProduction ? process.env.REDIS_HOST_PROD : process.env.REDIS_HOST_DEV}`)
 })
 
-redisClient.on('error', () => {
+redisClient.on('error', (err) => {
   console.log('Error ' + err)
 })
 
