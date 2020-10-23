@@ -13,17 +13,18 @@ const path = require('path')
 const swaggerUI = require('swagger-ui-express')
 const swaggerJsDoc = require('swagger-jsdoc')
 
-// redis
+// redis + db
 const redisClient = require('./config/cacheConfig')
+const pool = require('./config/dbConfig')
 
 // Routes
-// const tweetsRouter = require('./api/tweets')
-// const tradingviewRouter = require('./api/tradingview')
-// const tickerRouter = require('./api/ticker')
-// const adminRouter = require('./api/admin')
+const tweetsRouter = require('./api/tweets')
+const tradingviewRouter = require('./api/tradingview')
+const tickerRouter = require('./api/ticker')
+const adminRouter = require('./api/admin')
 
 // Database tables
-const db = require('./models/db')
+// const db = require('./models/db')
 
 // Init app
 const app = express()
@@ -63,11 +64,11 @@ logger.token('res', (req, res) => {
 
 // API routes
 // app.use('/api', analysisRouter)
-// app.use('/api/tradingview', tradingviewRouter)
-// app.use('/api/ticker', tickerRouter)
-// app.use('/api/tweets', tweetsRouter)
-// app.use('/api/admin', adminRouter)
-// app.use('/api', testRouter)
+app.use('/api/tradingview', tradingviewRouter)
+app.use('/api/ticker', tickerRouter)
+app.use('/api/tweets', tweetsRouter)
+app.use('/api/admin', adminRouter)
+
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
 // Routes which arent associated to API will redirect to static assets for SPA
