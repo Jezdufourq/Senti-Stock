@@ -329,40 +329,6 @@ export default {
           console.log(error)
         })
     }
-    // this.datacollection = {
-    //         datasets: [
-    //           {
-    //             label: 'Data One',
-    //             borderColor: '#00A2BF',
-    //             fill: false,
-    //             data: [
-    //               {
-    //                 t: new Date(2020, 10, 10, 10, 10, 10, 10),
-    //                 y: this.getRandomInt()
-    //               },
-    //               {
-    //                 t: new Date(2020, 10, 11, 10, 10, 10, 10),
-    //                 y: this.getRandomInt()
-    //               }
-    //             ]
-    //           },
-    //           {
-    //             label: 'Data One',
-    //             borderColor: '#f87979',
-    //             fill: false,
-    //             data: [
-    //               {
-    //                 t: new Date(2020, 10, 10, 10, 10, 10, 10),
-    //                 y: this.getRandomInt()
-    //               },
-    //               {
-    //                 t: new Date(2020, 10, 11, 10, 10, 10, 10),
-    //                 y: this.getRandomInt()
-    //               }
-    //             ]
-    //           }
-    //         ]
-    //       }
   }
 }
 </script>
