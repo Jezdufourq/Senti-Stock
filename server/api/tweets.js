@@ -2,13 +2,12 @@
 var express = require('express')
 const asyncHandler = require('express-async-handler')
 var router = express.Router()
+const redisClient = require('../config/cacheConfig')
 
 // util import
 const Tweets = require('../controllers/tweetsUtil')
 const Cache = require('../controllers/cache')
 const tradingViewUtil = require('../controllers/tradingviewUtil')
-const redis = require('redis')
-const client = redis.createClient()
 
 /**
  * Gets the data for the current stock ticker (this includes the sentiment)
@@ -16,7 +15,7 @@ const client = redis.createClient()
  */
 router.get('/analysis/:ticker', asyncHandler(async function (req, res, next) {
   const { ticker } = req.params
-  return client.get(ticker, async function (error, result) {
+  return redisClient.get(ticker, async function (error, result) {
     if (error) {
       console.log(error)
       return res.status(500)

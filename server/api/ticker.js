@@ -1,10 +1,11 @@
 var express = require('express')
 const asyncHandler = require('express-async-handler')
 var router = express.Router()
-const Ticker = require('../controllers/tickerUtil')
+const redisClient = require('../config/cacheConfig')
+
+// util import
 const Cache = require('../controllers/cache')
-const redis = require('redis')
-const client = redis.createClient()
+const Ticker = require('../controllers/tickerUtil')
 
 /**
  * Get current stored tickers for tweets
@@ -13,7 +14,7 @@ router.get('/current-tickers', asyncHandler(async function (req, res, next) {
   // check in the cache
   // if not there, check in the database
   const tickerKey = 'current-tickers'
-  return client.get(tickerKey, async function (error, result) {
+  return redisClient.get(tickerKey, async function (error, result) {
     if (error) {
       console.log(error)
       return res.status(500)
