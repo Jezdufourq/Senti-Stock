@@ -51,9 +51,9 @@ const TweetDAO = {
     console.log(req.ticker)
     try {
       const { rows } = await pool.query(queryText, [req.ticker])
-      if (!rows[0]) {
-        return res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.ticker}` })
-      }
+      // if (!rows[0]) {
+      //   return res.status(400).send({ message: `There are currently no entries in the database for ticker ${req.ticker}` })
+      // }
       return rows
     } catch (error) {
       return res.status(500).send('Error')

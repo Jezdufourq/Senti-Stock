@@ -32,10 +32,8 @@ module.exports = {
   createTweets: function (req) {
     const ticker = req.ticker
     const tweets = req.data
-    const averageSentiment = req.averageSentiment
     redisClient.setex(ticker, 3600, JSON.stringify({
       query: ticker,
-      averageSentiment: averageSentiment,
       tweets
     }), function (error, result) {
       if (error) {
@@ -47,6 +45,36 @@ module.exports = {
   getCurrentTweets: function (req, res) {
     const ticker = req.ticker
     redisClient.get(ticker, function (error, result) {
+      if (error) {
+        console.log(error)
+        return error
+      }
+      console.log(JSON.stringify(result))
+      const resultJSON = JSON.parse(result)
+      return res.status(200).json(resultJSON)
+    })
+  },
+
+  createHistoricalAverage: function (req, res) {
+    const tickerKey = 'historical-average:'
+    const ticker = req.ticker
+    const historicalAverage = req.data
+    return redisClient.setex(tickerKey + ticker, 3600, JSON.stringify({
+      query: ticker,
+      historicalAverage
+    }), function (error, result) {
+      if (error) {
+        console.log(error)
+        return result
+      }
+      return result
+    })
+  },
+
+  getHistoricalAverage: function (req, res) {
+    const historicalKey = 'historical-average:'
+    const ticker = req.ticker
+    redisClient.get(historicalKey + ticker, function (error, result) {
       if (error) {
         console.log(error)
         return error

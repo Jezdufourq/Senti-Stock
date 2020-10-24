@@ -34,17 +34,42 @@ router.get('/analysis/:ticker', asyncHandler(async function (req, res, next) {
 }))
 
 /**
- * Gets the analysis of a ticker using historical data.
- * Averages all of the analysis up and then returns the result
+ * Gets all of the historical averages for the tweets
  */
 router.get('/historical-analysis/:ticker', asyncHandler(async function (req, res, next) {
+  // check in the cache
+  // if not there, check in the database
+  const historicalKey = 'historical-average:'
   const { ticker } = req.params
-  const response = await Tweets.createHistoricalTweetAnalysis({ ticker: ticker })
-  res.status(200).send(JSON.stringify(response))
+  return redisClient.get(historicalKey + ticker, async function (error, result) {
+    if (error) {
+      console.log(error)
+      return res.status(500)
+    }
+    if (result) {
+      console.log('cache')
+      const resultJSON = JSON.parse(result)
+      return res.status(200).json(resultJSON)
+    } else {
+      console.log('db')
+      const historicalAverage = await Tweets.getHistoricalAverageOnTicker({ ticker: ticker })
+      // update cache
+      Cache.createHistoricalAverage({ ticker: ticker, data: historicalAverage })
+      return res.status(200).json({ query: ticker, average: historicalAverage })
+    }
+  })
 }))
 
-router.post('/historical-analysis', asyncHandler(function (req, res, next) {
-
+/**
+ * Creating the historical average for the given tweet
+ */
+router.post('/historical-analysis', asyncHandler(async function (req, res, next) {
+  const { ticker } = req.body
+  await Tweets.createHistoricalAverage({ ticker: ticker, lang: 'en', count: 100, result_type: 'recent' })
+  const historicalAverage = await Tweets.getHistoricalAverageOnTicker({ ticker: ticker })
+  // Persisting into the redis cache
+  Cache.createHistoricalAverage({ ticker: ticker, data: historicalAverage })
+  res.status(200).send({ query: ticker, historicalAverage: historicalAverage })
 }))
 
 /**
@@ -61,7 +86,7 @@ router.post('/analysis', asyncHandler(async function (req, res, next) {
     next(err)
   }
   // creating the analysis and persisting into the database
-  await Tweets.createTweetsAnalysis({ q: ticker, lang: 'en', count: 100, result_type: 'recent' })
+  await Tweets.createTweetsAnalysis({ ticker: ticker, lang: 'en', count: 100, result_type: 'recent' })
   // get all of the tweetsSentiment (including historical - using database)
   const tweetsSentiment = await Tweets.getTweets({ ticker: ticker })
   // persisting into the redis cache

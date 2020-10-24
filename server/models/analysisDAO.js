@@ -2,7 +2,7 @@ const moment = require('moment')
 const uuidV4 = require('uuid/v4')
 const pool = require('../config/dbConfig')
 
-const analysisDAO = {
+const AnalysisDAO = {
   /**
    * Retrieve all tweets based on stock ticker
    */
@@ -26,7 +26,7 @@ const analysisDAO = {
         req.ticker
       ]
       const { rows } = await pool.query(queryText, insertedValues)
-      return JSON.stringify(rows)
+      return rows
     } catch (error) {
       console.log(error)
       return error
@@ -71,5 +71,5 @@ const analysisDAO = {
 }
 
 module.exports = {
-  analysisDAO
+  AnalysisDAO
 }

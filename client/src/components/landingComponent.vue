@@ -1,12 +1,11 @@
 <template>
   <div class="row">
-    <div class="col-auto q-pa-md">
-      <div style="width:500px" class="full-height">
-        <q-card class="full-height">
-          <div class="row items-center">
-            <div class="text-h3 q-pa-md text-left text-bold">Your Tickers</div>
+    <div class="col q-pa-md">
+        <q-card class="q-pa-md full-height full-width" style="max-height:700px">
+          <div class="row items-center justify-center  q-pa-md">
+            <div class="col-auto text-h3 q-pa-md text-bold">Your Tickers</div>
             <div class="col-auto">
-              <q-btn color="primary" text-color="white" label="Add Ticker" @click="dialog = true" />
+              <q-btn color="primary" text-color="white" round icon="add" @click="dialog = true" />
               <q-dialog v-model="dialog">
                 <div v-if="loadingState" class="col" style="width:500px; height:300px">
                   <loading />
@@ -44,12 +43,8 @@
               </q-dialog>
             </div>
           </div>
-          <div
-            v-if="currentStockTickers.length === 0"
-            class="q-pa-md"
-            style="height:200px"
-          >You need to search some tickers. Click Add Ticker.</div>
-          <div class="list scroll q-pa-md">
+          <div v-if="currentStockTickers.length === 0" class="q-pa-md">You need to search some tickers. Click Add Ticker.</div>
+          <div style="max-height: 500px" class="list scroll q-pa-md">
             <q-list>
               <q-item v-for="ticker in currentStockTickers" :key="ticker.ticker_id" clickable>
                 <q-item-section class="text-body text-bold">{{ ticker.ticker }}</q-item-section>
@@ -66,29 +61,60 @@
             </q-list>
           </div>
         </q-card>
-      </div>
     </div>
-    <div class="col-auto q-pa-md">
-      <q-card class="q-pa-md full-height">
+    <div class="col q-pa-md">
+      <q-card class="q-pa-md full-height full-width" style="max-height:700px">
         <q-card-section>
-          <div class="text-h3 q-pa-md text-left text-bold">Your Chart</div>
-          <q-btn
-            color="primary"
-            text-color="white"
-            label="Analyze Tickers"
-            @click="analyzeTickers()"
-          />
+          <div class="row items-center justify-center">
+            <div class="col-auto text-h3 q-pa-md text-bold">Sentiment</div>
+            <div class="col-auto">
+              <q-btn
+                color="primary"
+                round
+                icon="replay"
+                text-color="white"
+                @click="analyzeTickers()"
+              />
+            </div>
+          </div>
         </q-card-section>
         <q-card-section>
-          <div class="small">
-            <line-chart :chart-data="chartData" :options="chartOptions"></line-chart>
-          </div>
+            <line-chart v-if="!analysisChartLoading" :chart-data="chartData" :options="chartOptions"></line-chart>
+            <div class="row items-center justify-center">
+              <q-spinner-bars
+                v-if="analysisChartLoading"
+                color="primary"
+                size="5em"
+              />
+            </div>
         </q-card-section>
       </q-card>
     </div>
-    <div class="col-auto q-pa-md">
-      <q-card class="q-pa-md full-height full-width">
+    <div class="col q-pa-md">
+      <q-card class="q-pa-md full-height full-width" style="max-height:700px">
         <q-card-section>
+          <div class="row items-center justify-center">
+            <div class="text-h3 q-pa-md text-bold">Average</div>
+            <div class="col-auto">
+              <q-btn
+                round
+                icon="replay"
+                color="primary"
+                text-color="white"
+                @click="analyzeAverage()"
+              />
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-section>
+          <line-chart v-if="!historicalChartLoading" :chart-data="averageChartData" :options="chartOptions"></line-chart>
+            <div class="row items-center justify-center">
+              <q-spinner-bars
+                v-if="historicalChartLoading"
+                color="primary"
+                size="5em"
+              />
+            </div>
         </q-card-section>
       </q-card>
     </div>
@@ -109,15 +135,26 @@ export default {
       datacollection: null,
       currentTickers: [],
       chartData: {},
+      averageChartData: {},
       chartOptions: {
         gridLines: {
           display: true
         },
         scales: {
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Sentiment (%)'
+            }
+          }],
           xAxes: [
             {
               type: 'time',
               distribution: 'series',
+              scaleLabel: {
+                display: true,
+                labelString: 'Time'
+              },
               time: {
                 unit: 'day',
                 displayFormats: {
@@ -131,6 +168,8 @@ export default {
       items: [],
       dialog: false,
       loadingState: true,
+      analysisChartLoading: false,
+      historicalChartLoading: false,
       currentStockTickers: null,
       stockTickerSearch: [],
       tickers: [],
@@ -168,14 +207,14 @@ export default {
     axios
       .get('api/ticker/current-tickers')
       .then((response) => {
-        console.log(response)
         this.currentStockTickers = response.data.tickers
       })
       .catch((error) => {
         console.log(error)
       })
       .finally(() => {
-        this.loadHistoricalAnalysis()
+        this.loadAnalysisChart()
+        this.loadHistoricalChart()
       })
     axios
       .get('api/tradingview/search-top-tickers')
@@ -190,7 +229,7 @@ export default {
       })
   },
   methods: {
-    loadHistoricalAnalysis () {
+    loadAnalysisChart () {
       var tickerPromiseArr = []
       var updatedChartData = []
       console.log(this.currentStockTickers)
@@ -205,12 +244,10 @@ export default {
       }
       Promise.all(tickerPromiseArr)
         .then((response) => {
-          console.log(response)
           response.forEach((tweetData) => {
             updatedChartData.push(
-              this.updateChart(tweetData.data.tweets, tweetData.data.query)
+              this.updateAnalysisChart(tweetData.data.tweets)
             )
-            console.log(tweetData)
           })
         })
         .catch((error) => {
@@ -222,22 +259,62 @@ export default {
           }
         })
     },
-    loadHistoricalChart (tweetData, ticker) {
-      var data = []
-      tweetData.forEach((tweets) => {
-        console.log(`tweet date ${tweets.tweet_date}`)
-        console.log(`sentiment ${tweets.sentiment}`)
-        data.push({ t: tweets.tweet_date, y: tweets.sentiment })
-      })
-      var returnObj = {
-        label: ticker,
-        borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-        fill: true,
-        lineTension: 0.5,
-        pointRadius: 0.1,
-        data: data
+    loadHistoricalChart () {
+      var tickerPromiseArr = []
+      var updatedChartData = []
+      console.log(this.currentStockTickers)
+      if (this.currentStockTickers.length != null) {
+        this.currentStockTickers.forEach((tickers) => {
+          tickerPromiseArr.push(
+            axios.get(`api/tweets/historical-analysis/${tickers.ticker}`)
+          )
+        })
+      } else {
+        // TODO: throw an error saying that you cant analyze any tickers
       }
-      return returnObj
+      Promise.all(tickerPromiseArr)
+        .then((response) => {
+          response.forEach((tweetData) => {
+            updatedChartData.push(this.updateAverageChart(tweetData.data.historicalAverage))
+          })
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+        .finally(() => {
+          this.averageChartData = {
+            datasets: updatedChartData
+          }
+        })
+    },
+    analyzeAverage () {
+      var tickerPromiseArr = []
+      var updatedChartData = []
+      if (this.currentStockTickers.length != null) {
+        this.currentStockTickers.forEach((tickers) => {
+          tickerPromiseArr.push(
+            axios.post('api/tweets/historical-analysis', { ticker: tickers.ticker })
+          )
+        })
+      } else {
+        // TODO: throw an error saying that you cant analyze any tickers
+      }
+      this.historicalChartLoading = true
+      Promise.all(tickerPromiseArr)
+        .then((response) => {
+          response.forEach((tweetData) => {
+            updatedChartData.push(this.updateAverageChart(tweetData.data.historicalAverage))
+          })
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+        .finally(() => {
+          this.averageChartData = {
+            datasets: updatedChartData
+          }
+          this.historicalChartLoading = false
+        })
     },
     analyzeTickers () {
       var tickerPromiseArr = []
@@ -252,11 +329,11 @@ export default {
       } else {
         // TODO: throw an error saying that you cant analyze any tickers
       }
+      this.analysisChartLoading = true
       Promise.all(tickerPromiseArr)
         .then((response) => {
           response.forEach((tweetData) => {
-            updatedChartData.push(this.updateChart(tweetData.data.tweets, tweetData.data.query))
-            console.log(updatedChartData)
+            updatedChartData.push(this.updateAnalysisChart(tweetData.data.tweets))
           })
         })
         .catch((error) => {
@@ -266,21 +343,37 @@ export default {
           this.chartData = {
             datasets: updatedChartData
           }
+          this.analysisChartLoading = false
         })
     },
-    updateChart (tweetData) {
+    updateAnalysisChart (tweetData) {
       var data = []
       var tickerName = ''
       tweetData.forEach((tweets) => {
-        console.log(`tweet date ${tweets.tweet_date}`)
-        console.log(`sentiment ${tweets.sentiment}`)
         data.push({ t: tweets.tweet_date, y: tweets.sentiment })
         tickerName = tweets.ticker
       })
       var returnObj = {
         label: tickerName,
         borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-        fill: true,
+        fill: false,
+        lineTension: 0.5,
+        pointRadius: 0.1,
+        data: data
+      }
+      return returnObj
+    },
+    updateAverageChart (tweetData) {
+      var data = []
+      var tickerName = ''
+      tweetData.forEach((tweets) => {
+        data.push({ t: tweets.created_date, y: tweets.average_sentiment })
+        tickerName = tweets.ticker
+      })
+      var returnObj = {
+        label: tickerName,
+        borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+        fill: false,
         lineTension: 0.5,
         pointRadius: 0.1,
         data: data
@@ -290,10 +383,8 @@ export default {
     resetData () {
       this.currentStockTickers = []
     },
-    fillData () {},
     updateTicker (ticker, exchange) {
       this.tickers.push({ ticker: ticker, exchange: exchange })
-      console.log(this.tickers)
     },
     searchTickerQuery (ticker) {
       axios
@@ -315,7 +406,6 @@ export default {
         })
         .then((response) => {
           this.currentStockTickers = response.data.tickers
-          console.log(response)
         })
         .catch((error) => {
           console.log(error)

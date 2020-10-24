@@ -1,8 +1,6 @@
 <template>
-  <q-page class="row">
-    <div>
-      <landing-component/>
-    </div>
+  <q-page >
+    <landing-component/>
   </q-page>
 </template>
 
