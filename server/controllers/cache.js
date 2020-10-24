@@ -32,14 +32,28 @@ module.exports = {
   createTweets: function (req) {
     const ticker = req.ticker
     const tweets = req.data
+    const averageSentiment = req.averageSentiment
     redisClient.setex(ticker, 3600, JSON.stringify({
       query: ticker,
+      averageSentiment: averageSentiment,
       tweets
     }), function (error, result) {
       if (error) {
         console.log(error)
       }
       return result
+    })
+  },
+  getCurrentTweets: function (req, res) {
+    const ticker = req.ticker
+    redisClient.get(ticker, function (error, result) {
+      if (error) {
+        console.log(error)
+        return error
+      }
+      console.log(JSON.stringify(result))
+      const resultJSON = JSON.parse(result)
+      return res.status(200).json(resultJSON)
     })
   },
 

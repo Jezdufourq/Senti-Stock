@@ -1,6 +1,25 @@
 const pool = require('../config/dbConfig')
 
 /**
+ * Creating the analysis table
+ */
+const createAnalysisTable = () => {
+  const queryText =
+  `CREATE TABLE IF NOT EXISTS
+   analysis(analysis_id UUID PRIMARY KEY,
+   created_date TIMESTAMP,
+   modified_date TIMESTAMP,
+   average_sentiment FLOAT8,
+   ticker VARCHAR(63));`
+  pool.query(queryText)
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+}
+/**
  * Create tweets table
  */
 const createTweetsTable = () => {
@@ -14,6 +33,20 @@ const createTweetsTable = () => {
     tweet_date TIMESTAMP,
     sentiment FLOAT8
     );`
+  pool.query(queryText)
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+}
+
+/**
+ * Drop analysis table
+ */
+const dropAnalysisTable = () => {
+  const queryText = 'DROP TABLE IF EXISTS analysis;'
   pool.query(queryText)
     .then((res) => {
       console.log(res)
@@ -78,6 +111,7 @@ const dropTickersTable = () => {
 const createAllTables = () => {
   createTweetsTable()
   createTickersTable()
+  createAnalysisTable()
 }
 
 /**
@@ -86,6 +120,7 @@ const createAllTables = () => {
 const dropAllTables = () => {
   dropTweetsTable()
   dropTickersTable()
+  dropAnalysisTable()
 }
 
 module.exports = {

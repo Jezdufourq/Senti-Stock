@@ -58,6 +58,21 @@ module.exports = {
   },
 
   /**
+   *
+   */
+  createHistoricalTweetAnalysis: async function (req, res) {
+    const ticker = req.ticker
+    const returnArr = []
+    const twitParams = {
+      q: q,
+      lang: lang,
+      result_type: result_type,
+      count: count
+    }
+    console.log(ticker)
+    return TweetDAO.getTweets({ ticker: ticker })
+  },
+  /**
    * Get tweets function
    * This retrieve the tweets from the database which have the certain ticker associated to them
    */

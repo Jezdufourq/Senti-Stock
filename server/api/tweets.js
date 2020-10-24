@@ -34,6 +34,20 @@ router.get('/analysis/:ticker', asyncHandler(async function (req, res, next) {
 }))
 
 /**
+ * Gets the analysis of a ticker using historical data.
+ * Averages all of the analysis up and then returns the result
+ */
+router.get('/historical-analysis/:ticker', asyncHandler(async function (req, res, next) {
+  const { ticker } = req.params
+  const response = await Tweets.createHistoricalTweetAnalysis({ ticker: ticker })
+  res.status(200).send(JSON.stringify(response))
+}))
+
+router.post('/historical-analysis', asyncHandler(function (req, res, next) {
+
+}))
+
+/**
  * Store the data for the tweets/sentiment analysis for a given stock ticker
  * response - all of the sentiment for the stock
  */

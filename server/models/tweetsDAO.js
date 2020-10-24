@@ -48,6 +48,7 @@ const TweetDAO = {
    */
   async getTweets (req, res) {
     const queryText = 'SELECT * FROM tweets WHERE ticker = $1'
+    console.log(req.ticker)
     try {
       const { rows } = await pool.query(queryText, [req.ticker])
       if (!rows[0]) {

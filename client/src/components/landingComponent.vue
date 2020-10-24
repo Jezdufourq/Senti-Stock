@@ -86,6 +86,12 @@
         </q-card-section>
       </q-card>
     </div>
+    <div class="col-auto q-pa-md">
+      <q-card class="q-pa-md full-height full-width">
+        <q-card-section>
+        </q-card-section>
+      </q-card>
+    </div>
   </div>
 </template>
 
