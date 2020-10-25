@@ -8,8 +8,20 @@ const Cache = require('../controllers/cache')
 const Ticker = require('../controllers/tickerUtil')
 
 /**
- * Get current stored tickers for tweets
- */
+ *
+ * @swagger
+ * /api/ticker/current-tickers:
+ *  get:
+ *   description: Retrieves the current tickers from the database
+ *   produces:
+ *    - application/json
+ *   response:
+ *    '200':
+ *     description: 'A successful response.'
+ *    '500':
+ *     description: 'Internal server error'
+ *
+*/
 router.get('/current-tickers', asyncHandler(async function (req, res, next) {
   // check in the cache
   // if not there, check in the database
@@ -34,8 +46,31 @@ router.get('/current-tickers', asyncHandler(async function (req, res, next) {
 }))
 
 /**
-  * Store the current tickers for tweets
-  */
+ *
+ * @swagger
+ * /api/ticker/current-ticker:
+ *  post:
+ *   description: Puts the ticker into the database, and returns the current tickers in the database
+ *   produces:
+ *    - application/json
+ *   parameters:
+ *      in: body
+ *      name: ticker
+ *      description: The ticker which you want to put in the database
+ *      type: string
+ *      required: true
+ *      in: body
+ *      name: exchange
+ *      description: The exchange of the ticker
+ *      type: string
+ *      required: false
+ *   response:
+ *    '200':
+ *     description: 'A successful response.'
+ *    '500':
+ *     description: 'Internal server error'
+ *
+*/
 router.post('/current-ticker', asyncHandler(async function (req, res, next) {
   const { ticker, exchange } = req.body
   // persist into the database
@@ -48,8 +83,26 @@ router.post('/current-ticker', asyncHandler(async function (req, res, next) {
 }))
 
 /**
- * delete a ticker from the database, update the cache
- */
+ *
+ * @swagger
+ * /api/ticker/delete-ticker:
+ *  delete:
+ *   description: Deletes the ticker from the database
+ *   produces:
+ *    - application/json
+ *   parameters:
+ *      in: query
+ *      name: tickerId
+ *      description: The ticker which you want to put in the database
+ *      type: string
+ *      required: true
+ *   response:
+ *    '200':
+ *     description: 'A successful response.'
+ *    '500':
+ *     description: 'Internal server error'
+ *
+*/
 router.delete('/delete-ticker/:tickerId', asyncHandler(async function (req, res, next) {
   const { tickerId } = req.params
   console.log(tickerId)

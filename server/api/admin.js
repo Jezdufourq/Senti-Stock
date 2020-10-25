@@ -4,6 +4,21 @@ var router = express.Router()
 const Cache = require('../controllers/cache')
 const Database = require('../models/db')
 
+/**
+ *
+ * @swagger
+ * /api/admin/reset:
+ *  get:
+ *   description: Clears the database and the cache
+ *   produces:
+ *    - application/json
+ *   response:
+ *    '200':
+ *     description: 'A successful response.'
+ *    '500':
+ *     description: 'Internal server error'
+ *
+*/
 router.get('/reset', asyncHandler(async function (req, res, next) {
   // await Cache.deleteCache()
   await Database.dropAllTables()

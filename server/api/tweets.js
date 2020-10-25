@@ -10,9 +10,26 @@ const Cache = require('../controllers/cache')
 const tradingViewUtil = require('../controllers/tradingviewUtil')
 
 /**
- * Gets the data for the current stock ticker (this includes the sentiment)
- * Returns the cache of the tweet, or the database entries
- */
+ *
+ * @swagger
+ * /api/tweets/analysis:
+ *  get:
+ *   description: Retrieves the analysis for the given stock ticker
+ *   produces:
+ *    - application/json
+ *   parameters:
+ *      in: query
+ *      name: ticker
+ *      description: The ticker which you want to get the analysis for
+ *      type: string
+ *      required: true
+ *   response:
+ *    '200':
+ *     description: 'A successful response.'
+ *    '500':
+ *     description: 'Internal server error'
+ *
+*/
 router.get('/analysis/:ticker', asyncHandler(async function (req, res, next) {
   const { ticker } = req.params
   return redisClient.get(ticker, async function (error, result) {
@@ -34,8 +51,26 @@ router.get('/analysis/:ticker', asyncHandler(async function (req, res, next) {
 }))
 
 /**
- * Gets all of the historical averages for the tweets
- */
+ *
+ * @swagger
+ * /api/tweets/historical-analysis:
+ *  get:
+ *   description: Retrieves the analysis for the given stock ticker
+ *   produces:
+ *    - application/json
+ *   parameters:
+ *      in: query
+ *      name: ticker
+ *      description: The ticker which you want to get the average analysis for
+ *      type: string
+ *      required: true
+ *   response:
+ *    '200':
+ *     description: 'A successful response.'
+ *    '500':
+ *     description: 'Internal server error'
+ *
+*/
 router.get('/historical-analysis/:ticker', asyncHandler(async function (req, res, next) {
   // check in the cache
   // if not there, check in the database
@@ -61,8 +96,26 @@ router.get('/historical-analysis/:ticker', asyncHandler(async function (req, res
 }))
 
 /**
- * Creating the historical average for the given tweet
- */
+ *
+ * @swagger
+ * /api/tweets/historical-analysis:
+ *  post:
+ *   description: Retrieves the average analysis for the given stock ticker
+ *   produces:
+ *    - application/json
+ *   parameters:
+ *      in: body
+ *      name: ticker
+ *      description: The ticker which you want to get the average analysis for
+ *      type: string
+ *      required: true
+ *   response:
+ *    '200':
+ *     description: 'A successful response.'
+ *    '500':
+ *     description: 'Internal server error'
+ *
+*/
 router.post('/historical-analysis', asyncHandler(async function (req, res, next) {
   const { ticker } = req.body
   await Tweets.createHistoricalAverage({ ticker: ticker, lang: 'en', count: 100, result_type: 'recent' })
@@ -73,9 +126,26 @@ router.post('/historical-analysis', asyncHandler(async function (req, res, next)
 }))
 
 /**
- * Store the data for the tweets/sentiment analysis for a given stock ticker
- * response - all of the sentiment for the stock
- */
+ *
+ * @swagger
+ * /api/tweets/analysis:
+ *  post:
+ *   description: Retrieves the analysis for the given stock ticker
+ *   produces:
+ *    - application/json
+ *   parameters:
+ *      in: body
+ *      name: ticker
+ *      description: The ticker which you want to get the average analysis for
+ *      type: string
+ *      required: true
+ *   response:
+ *    '200':
+ *     description: 'A successful response.'
+ *    '500':
+ *     description: 'Internal server error'
+ *
+*/
 router.post('/analysis', asyncHandler(async function (req, res, next) {
   const { ticker } = req.body
   // checking to see if the ticker is a valid ticker
