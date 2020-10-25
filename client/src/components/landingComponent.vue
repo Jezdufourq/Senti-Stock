@@ -366,6 +366,7 @@ export default {
     updateAverageChart (tweetData) {
       var data = []
       var tickerName = ''
+      console.log(tweetData)
       tweetData.forEach((tweets) => {
         data.push({ t: tweets.created_date, y: tweets.average_sentiment })
         tickerName = tweets.ticker

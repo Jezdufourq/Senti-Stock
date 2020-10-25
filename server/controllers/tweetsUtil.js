@@ -33,7 +33,7 @@ module.exports = {
       .catch((error) => {
         console.log(error)
       })
-
+    console.log(twitterSearchResults.data.statuses)
     for (const tweet of twitterSearchResults.data.statuses) {
       // token and stem the tweets
       const tokenAndStemResult = Parser.tokenAndStemTweets({ text: tweet.text })
@@ -59,6 +59,7 @@ module.exports = {
         await TweetDAO.createTweet({ tweet: tweet.text, tweet_id: tweet.id, ticker: ticker, tweet_date: tweet.created_at, sentiment: sentimentResult }).catch((error) => { console.log(error) })
       }
     }
+    console.log(returnArr)
     return returnArr
   },
 
@@ -119,7 +120,7 @@ module.exports = {
           console.log(error)
         })
       for (const tweet of twitterSearchResults.data.statuses) {
-      // token and stem the tweets
+        // token and stem the tweets
         const tokenAndStemResult = Parser.tokenAndStemTweets({ text: tweet.text })
         // perform some sentiment analysis
         const sentimentResult = Analysis.getSentiment({ text: tokenAndStemResult })
@@ -137,13 +138,15 @@ module.exports = {
           await TweetDAO.createTweet({ tweet: tweet.text, tweet_id: tweet.id, ticker: ticker, tweet_date: tweet.created_at, sentiment: sentimentResult }).catch((error) => { console.log(error) })
         }
       }
-      // fetch the data
+      // fetch the data + perform sentiment analysis on it
       const currentTweets = await TweetDAO.getTweets({ ticker: ticker })
-      // calculate the average
-      currentTweets.forEach((tweet) => {
-        cumulativeSentiment += tweet.sentiment
-      })
-      console.log(`currentTweets: ${currentTweets}`)
+      for (const tweet of currentTweets){
+         // token and stem the tweets
+         const tokenAndStemResult = Parser.tokenAndStemTweets({ text: tweet.tweet })
+         // perform some sentiment analysis
+         const sentimentResult = Analysis.getSentiment({ text: tokenAndStemResult })
+         cumulativeSentiment += sentimentResult
+      }
       average = cumulativeSentiment / currentTweets.length
       console.log(`average: ${average}`)
       // persist into the database
